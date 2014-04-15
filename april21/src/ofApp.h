@@ -3,6 +3,7 @@
 #include "ofMain.h"
 #include "ofxOpenCv.h"
 #include "ofxCv.h"
+#include "ArmContourFinder.h"
 #include "ofxKinect.h"
 
 class ofApp : public ofBaseApp{
@@ -19,5 +20,10 @@ class ofApp : public ofBaseApp{
 		ofxKinect 	kinect;
 		int 		nearThreshold;
 		int 		farThreshold;
+
+		ofxCvGrayscaleImage		inputImg;	// Raw input form kinect
+		ofxCvGrayscaleImage		threshImg;	// After thresholding
+
+		ArmContourFinder		contourFinder;
 		
 };

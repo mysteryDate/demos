@@ -1,0 +1,6 @@
+*/.DS_Store
+*/bin
+*/obj
+.DS_Store
+*.xcodeproj
+*.xcconfig

@@ -14,6 +14,11 @@ void ofApp::setup(){
 
 	ofSetFrameRate(60);
 
+	DX = -28;
+	DY = -8;
+	ZOOM = 2.57;
+	DEGREES = 0;
+
 }
 
 //--------------------------------------------------------------
@@ -54,9 +59,33 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
 
-	ofSetBackgroundColor(0,0,0);
-	//inputImg.draw(0, 0, kinect.width, kinect.height);
-	//threshImg.draw(0, 0, kinect.width, kinect.height);
+	// ofSetColor(0,0,0);
+	// ofRect(0, 0, 1920, 1080);
+
+	drawHandOverlay();
+
+	ofSetColor(255, 255, 255);
+	stringstream reportStream;
+	reportStream 
+	<< "DX: " << DX << ", DY: " << DY << endl
+	<< "ZOOM: " << ZOOM << ", DEGREES: " << DEGREES
+	// << "MAX_HAND_SIZE: " << contourFinder.MAX_HAND_SIZE << endl
+	// << "MIN_HAND_SIZE: " << contourFinder.MIN_HAND_SIZE
+	// << "Near threshold: " << nearThreshold << endl
+	// << "Far threshold: " << farThreshold 
+	<< endl;
+	ofDrawBitmapString(reportStream.str(), 20, 652);
+
+}
+
+void ofApp::drawHandOverlay() {
+
+	ofPushMatrix();
+	ofTranslate(DX, DY);
+	ofScale(ZOOM, ZOOM);
+	ofRotateZ(DEGREES);
+
+	inputImg.draw(0,0);
 	contourFinder.draw();
 	drawLabels();
 
@@ -74,17 +103,7 @@ void ofApp::draw(){
 		}
 	}
 
-	ofSetColor(255, 255, 255);
-	stringstream reportStream;
-	// reportStream 
-	// << "MAX_HAND_SIZE: " << contourFinder.MAX_HAND_SIZE << endl
-	// << "MIN_HAND_SIZE: " << contourFinder.MIN_HAND_SIZE
-	// << "Near threshold: " << nearThreshold << endl
-	// << "Far threshold: " << farThreshold 
-	// << endl;
-
-	// ofDrawBitmapString(reportStream.str(), 20, 652);
-
+	ofPopMatrix();
 }
 
 void ofApp::drawLabels() {
@@ -106,13 +125,6 @@ void ofApp::drawLabels() {
 	ofPopStyle();
 
 }
-
-// void drawHandOverlay() {
-
-// 	ofPushMatrix()
-
-
-// }
 
 //--------------------------------------------------------------
 void ofApp::exit(){
@@ -163,12 +175,39 @@ void ofApp::keyPressed(int key){
 			contourFinder.MIN_HAND_SIZE--;
 			break;
 
-		case ' ': {
-			for (int i = 0; i < contourFinder.size(); ++i)
-			{
-				contourFinder.handFound[i] = false;
-			}
-		}
+		case OF_KEY_UP:
+			DY--;
+			break;
+
+		case OF_KEY_LEFT:
+			DX--;
+			break;
+
+		case OF_KEY_DOWN:
+			DY++;
+			break;
+
+		case OF_KEY_RIGHT:
+			DX++;
+			break;
+
+		case 'Z':
+			ZOOM *= 1.1;
+			break;
+
+		case 'z':
+			ZOOM *= 0.9;
+			break;
+
+		case 'R':
+			DEGREES += 1;
+			break;
+
+		case 'r':
+			DEGREES -= 1;
+			break;
+
+		
 	}
 
 }

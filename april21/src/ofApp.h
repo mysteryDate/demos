@@ -26,6 +26,11 @@ class ofApp : public ofBaseApp{
 
 		ArmContourFinder		contourFinder;
 
+		void drawHandOverlay();
 		void drawLabels();
+
+		//For Calibration
+		int DX, DY;
+		float ZOOM, DEGREES;
 		
 };

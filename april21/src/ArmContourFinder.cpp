@@ -85,8 +85,7 @@ void ArmContourFinder::updateArm(int n) {
 	}
 
 	ofPoint newKeypoints [] = {newEnds[0], newEnds[1], newTip, newWrists[0], newWrists[1]};
-	
-	float dist;
+
 	for (int i = 0; i < 5; ++i)
 	{
 		float smoothedX = ofLerp(newKeypoints[i].x, keypoints[i]->x, SMOOTHING_RATE);

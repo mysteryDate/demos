@@ -19,6 +19,9 @@ void ofApp::setup(){
 	ZOOM = 2.57;
 	DEGREES = 0;
 
+	handSmoother = 4;
+
+	scaleup = 1;
 }
 
 //--------------------------------------------------------------
@@ -49,18 +52,13 @@ void ofApp::update(){
 	contourFinder.findContours(threshImg);
 	contourFinder.update();
 
-	// for (int i = 0; i < contourFinder.size(); ++i)
-	// {
-	// 	contourFinder.findHand(i);
-	// }
-
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
 
-	// ofSetColor(0,0,0);
-	// ofRect(0, 0, 1920, 1080);
+	ofSetColor(0,0,0);
+	ofRect(0, 0, 1920, 1080);
 
 	drawHandOverlay();
 
@@ -68,7 +66,9 @@ void ofApp::draw(){
 	stringstream reportStream;
 	reportStream 
 	<< "DX: " << DX << ", DY: " << DY << endl
-	<< "ZOOM: " << ZOOM << ", DEGREES: " << DEGREES
+	<< "ZOOM: " << ZOOM << ", DEGREES: " << DEGREES << endl
+	<< "handSmoother: " << handSmoother
+	<< "scaleup: " << scaleup
 	// << "MAX_HAND_SIZE: " << contourFinder.MAX_HAND_SIZE << endl
 	// << "MIN_HAND_SIZE: " << contourFinder.MIN_HAND_SIZE
 	// << "Near threshold: " << nearThreshold << endl
@@ -85,21 +85,29 @@ void ofApp::drawHandOverlay() {
 	ofScale(ZOOM, ZOOM);
 	ofRotateZ(DEGREES);
 
-	inputImg.draw(0,0);
+	//inputImg.draw(0,0);
 	contourFinder.draw();
 	drawLabels();
 
 	for (int i = 0; i < contourFinder.size(); ++i)
 	{
 		if(contourFinder.handFound[i]) {
-			ofSetColor(255, 0, 255);
-			ofCircle(contourFinder.ends[i][0], 3);
-			ofCircle(contourFinder.ends[i][1], 3);
-			ofCircle(contourFinder.tips[i], 3);
-			ofCircle(contourFinder.wrists[i][0], 3);
-			ofCircle(contourFinder.wrists[i][1], 3);
-			ofSetColor(0, 255, 0);
-			contourFinder.hands[i].draw();
+			ofPushStyle();
+			ofPushMatrix();
+
+			//float scaleup = 1.5;
+			ofSetColor(0, 255, 3);
+			ofPolyline smoothHand = contourFinder.hands[i].getSmoothed(handSmoother);
+			ofPoint centroid = smoothHand.getCentroid2D();
+			ofTranslate(centroid.x*(1-scaleup), centroid.y*(1-scaleup));
+			ofScale(scaleup, scaleup);
+
+			smoothHand.draw();
+			ofCircle(centroid, 3);
+
+			ofPopMatrix();
+			ofPopStyle();
+
 		}
 	}
 
@@ -207,6 +215,21 @@ void ofApp::keyPressed(int key){
 			DEGREES -= 1;
 			break;
 
+		case 'S':
+			handSmoother++;
+			break;
+
+		case 's':
+			handSmoother--;
+			break;
+
+		case 'U':
+			scaleup *= 1.1;
+			break;
+
+		case 'u':
+			scaleup *= 0.9;
+			break;
 		
 	}
 

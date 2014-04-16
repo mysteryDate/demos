@@ -32,5 +32,8 @@ class ofApp : public ofBaseApp{
 		//For Calibration
 		int DX, DY;
 		float ZOOM, DEGREES;
+
+		int handSmoother;
+		float scaleup;
 		
 };

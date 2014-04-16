@@ -12,13 +12,15 @@ public:
 	vector< vector< ofPoint > > ends;
 	vector< ofPoint > tips;
 	vector< vector< ofPoint > > wrists;
+	vector< bool > handFound;
+	vector< ofPolyline > hands;
 
 	// Matrix of how many skips have happened, first dimension is id, then end1, end2, tip
 	vector< vector< int > > skippedFrames;
 
-	vector< bool > handFound;
+	vector< unsigned int > oldLabels;
 
-	vector< ofPolyline > hands;
+
 
 	void update();
 	

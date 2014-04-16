@@ -54,9 +54,11 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
 
+	ofSetBackgroundColor(0,0,0);
 	//inputImg.draw(0, 0, kinect.width, kinect.height);
 	//threshImg.draw(0, 0, kinect.width, kinect.height);
 	contourFinder.draw();
+	drawLabels();
 
 	for (int i = 0; i < contourFinder.size(); ++i)
 	{
@@ -84,6 +86,33 @@ void ofApp::draw(){
 	// ofDrawBitmapString(reportStream.str(), 20, 652);
 
 }
+
+void ofApp::drawLabels() {
+
+	ofPushStyle();
+	ofSetColor(0,255,0);
+	ofxCv::RectTracker& tracker = contourFinder.getTracker();
+
+	for (int i = 0; i < contourFinder.size(); ++i)
+	{
+		ofPoint center = ofxCv::toOf(contourFinder.getCenter(i));
+		ofPushMatrix();
+		ofTranslate(center.x, center.y);
+		int label = contourFinder.getLabel(i);
+		string msg = ofToString(label) + ":" + ofToString(tracker.getAge(label));
+		ofDrawBitmapString(msg, 0, 0);
+		ofPopMatrix();
+	}
+	ofPopStyle();
+
+}
+
+// void drawHandOverlay() {
+
+// 	ofPushMatrix()
+
+
+// }
 
 //--------------------------------------------------------------
 void ofApp::exit(){

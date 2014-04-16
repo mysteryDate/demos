@@ -28,8 +28,33 @@ void ArmContourFinder::update() {
 	hands.resize(size);
 	handFound.resize(size, false);
 
+
+	// First put the info with the right blob (HACK, this whole experiment should probably be a linked list)
+	oldLabels.resize(size);
+	vector< vector< ofPoint > > oldEnds = ends;
+	vector< ofPoint > oldTips = tips;
+	vector< vector< ofPoint > > oldWrists = wrists;
+	vector< bool > oldHandFound = handFound;
+	vector< ofPolyline > oldHands = hands;
+
 	for (int i = 0; i < size; ++i)
 	{
+		for (int j = 0; j < size; ++j)
+		{
+			if(oldLabels[i] == getLabel(j)) {
+				ends[i] = oldEnds[j];
+				tips[i] = oldTips[j];
+				wrists[i] = oldWrists[j];
+				handFound[i] = handFound[j];
+				hands[i] = hands[j];
+			}
+		}
+	}
+
+
+	for (int i = 0; i < size; ++i)
+	{
+		oldLabels[i] = getLabel(i);
 		if(handFound[i]) {
 			updateArm(i);
 		}
@@ -88,7 +113,7 @@ void ArmContourFinder::addHand(int n) {
 			i = 0;
 	}
 	// So that it closes up;
-	hands[n].addVertex( polylines[n][start] );
+	hands[n].setClosed(true);
 
 
 

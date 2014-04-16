@@ -25,5 +25,7 @@ class ofApp : public ofBaseApp{
 		ofxCvGrayscaleImage		threshImg;	// After thresholding
 
 		ArmContourFinder		contourFinder;
+
+		void drawLabels();
 		
 };

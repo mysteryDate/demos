@@ -18,7 +18,6 @@ public:
 
 	vector< bool > handFound;
 
-	vector< ofPolyline > simplifiedPolylines;
 	vector< ofPolyline > hands;
 
 	void update();
@@ -41,5 +40,7 @@ private:
 	vector< ofPoint > 	findEnds(int n);
 	ofPoint				findTip(int n, vector< ofPoint > newEnds);
 	vector< ofPoint > 	findWrists(int n, ofPoint newTip, vector< ofPoint > newEnds);
+
+	void updateArm(int n);
 
 };

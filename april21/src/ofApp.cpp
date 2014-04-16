@@ -44,10 +44,10 @@ void ofApp::update(){
 	contourFinder.findContours(threshImg);
 	contourFinder.update();
 
-	for (int i = 0; i < contourFinder.size(); ++i)
-	{
-		contourFinder.findHand(i);
-	}
+	// for (int i = 0; i < contourFinder.size(); ++i)
+	// {
+	// 	contourFinder.findHand(i);
+	// }
 
 }
 
@@ -67,22 +67,19 @@ void ofApp::draw(){
 			ofCircle(contourFinder.tips[i], 3);
 			ofCircle(contourFinder.wrists[i][0], 3);
 			ofCircle(contourFinder.wrists[i][1], 3);
-			ofNoFill();
-			ofCircle(contourFinder.tips[i], contourFinder.MAX_HAND_SIZE);
-			ofCircle(contourFinder.tips[i], contourFinder.MIN_HAND_SIZE);
 		}
 	}
 
 	ofSetColor(255, 255, 255);
 	stringstream reportStream;
-	reportStream 
-	<< "MAX_HAND_SIZE: " << contourFinder.MAX_HAND_SIZE << endl
-	<< "MIN_HAND_SIZE: " << contourFinder.MIN_HAND_SIZE
+	// reportStream 
+	// << "MAX_HAND_SIZE: " << contourFinder.MAX_HAND_SIZE << endl
+	// << "MIN_HAND_SIZE: " << contourFinder.MIN_HAND_SIZE
 	// << "Near threshold: " << nearThreshold << endl
 	// << "Far threshold: " << farThreshold 
-	<< endl;
+	// << endl;
 
-	ofDrawBitmapString(reportStream.str(), 20, 652);
+	// ofDrawBitmapString(reportStream.str(), 20, 652);
 
 }
 
@@ -134,6 +131,13 @@ void ofApp::keyPressed(int key){
 		case 'g':
 			contourFinder.MIN_HAND_SIZE--;
 			break;
+
+		case ' ': {
+			for (int i = 0; i < contourFinder.size(); ++i)
+			{
+				contourFinder.handFound[i] = false;
+			}
+		}
 	}
 
 }

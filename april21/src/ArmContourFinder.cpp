@@ -12,6 +12,9 @@ ArmContourFinder::ArmContourFinder() {
 	MIN_HAND_SIZE = 50;
 	MAX_HAND_SIZE = 115;
 
+	MAX_MOVEMENT_DISTANCE = 20;
+	SMOOTHING_RATE = 0.5;
+
 }
 
 void ArmContourFinder::update() {
@@ -19,18 +22,48 @@ void ArmContourFinder::update() {
 	//To run every frame
 	int size = polylines.size();
 
-	simplifiedPolylines.resize(size);
 	ends.resize(size);
 	wrists.resize(size);
 	tips.resize(size);
-	handFound.resize(size);
+	handFound.resize(size, false);
 
 	for (int i = 0; i < size; ++i)
 	{
-		handFound[i] = false;
-		simplifiedPolylines[i] = polylines[i];
-		simplifiedPolylines[i].simplify(tolerance);
+		if(handFound[i]) {
+			updateArm(i);
+		}
+		else {
+			handFound[i] = findHand(i);
+		}
 	}
+}
+
+void ArmContourFinder::updateArm(int n) {
+
+	ofPoint * keypoints[] = {&ends[n][0], &ends[n][1], &tips[n], &wrists[n][0], &wrists[n][1]};
+	ofVec2f velocity = ofxCv::toOf(getVelocity(n));
+	
+	vector< ofPoint > newEnds = findEnds(n);
+	ofPoint newTip = findTip(n, newEnds);
+	vector< ofPoint > newWrists = findWrists(n, newTip, newEnds);
+	if( newWrists.size() != 2 ) {
+		handFound[n] = false;
+		return;
+	}
+
+	ofPoint newKeypoints [] = {newEnds[0], newEnds[1], newTip, newWrists[0], newWrists[1]};
+	
+	float dist;
+	for (int i = 0; i < 5; ++i)
+	{
+		// float vx = newKeypoints[i].x - keypoints[i]->x - velocity.x;
+		// float vy = newKeypoints[i].y - keypoints[i]->y - velocity.y;
+		float smoothedX = ofLerp(newKeypoints[i].x, keypoints[i]->x, SMOOTHING_RATE);
+		float smoothedY = ofLerp(newKeypoints[i].y, keypoints[i]->y, SMOOTHING_RATE);
+		newKeypoints[i] = ofPoint(smoothedX, smoothedY);
+		*keypoints[i] = newKeypoints[i];
+	}
+	
 
 }
 
@@ -56,8 +89,6 @@ bool ArmContourFinder::findHand(int n) {
 	ends[n] = newEnds;
 	tips[n] = newTip;
 	wrists[n] = newWrists;
-
-	handFound[n] = true;
 
 	return true;
 

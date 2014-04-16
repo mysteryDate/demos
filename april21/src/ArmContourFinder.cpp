@@ -13,7 +13,7 @@ ArmContourFinder::ArmContourFinder() {
 	MAX_HAND_SIZE = 115;
 
 	MAX_MOVEMENT_DISTANCE = 20;
-	SMOOTHING_RATE = 0.5;
+	SMOOTHING_RATE = 0.9;
 
 }
 
@@ -56,8 +56,6 @@ void ArmContourFinder::updateArm(int n) {
 	float dist;
 	for (int i = 0; i < 5; ++i)
 	{
-		// float vx = newKeypoints[i].x - keypoints[i]->x - velocity.x;
-		// float vy = newKeypoints[i].y - keypoints[i]->y - velocity.y;
 		float smoothedX = ofLerp(newKeypoints[i].x, keypoints[i]->x, SMOOTHING_RATE);
 		float smoothedY = ofLerp(newKeypoints[i].y, keypoints[i]->y, SMOOTHING_RATE);
 		newKeypoints[i] = ofPoint(smoothedX, smoothedY);

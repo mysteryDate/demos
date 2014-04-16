@@ -9,11 +9,15 @@ void ofApp::setup(){
 	inputImg.allocate(kinect.width, kinect.height);
 	threshImg.allocate(kinect.width, kinect.height);
 
+	background.loadImage("rivers.jpg");
+	background.setImageType(OF_IMAGE_COLOR);
+
 	nearThreshold = 250;
 	farThreshold = 165;
 
 	ofSetFrameRate(60);
 
+	// Good for kinect in present orientation
 	DX = -28;
 	DY = -8;
 	ZOOM = 2.57;
@@ -22,6 +26,8 @@ void ofApp::setup(){
 	handSmoother = 4;
 
 	scaleup = 1;
+
+	dispMode = 0;
 }
 
 //--------------------------------------------------------------
@@ -57,24 +63,31 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
 
-	ofSetColor(0,0,0);
-	ofRect(0, 0, 1920, 1080);
+	ofPushMatrix();
+	ofTranslate(137, 85);
+	ofScale(0.426, 0.426);
+	ofRotateZ(-10);
+	background.draw(0, 0);
+	ofPopMatrix();
 
+	ofPushStyle();
 	drawHandOverlay();
 
-	ofSetColor(255, 255, 255);
+	ofSetColor(0, 0, 0);
 	stringstream reportStream;
 	reportStream 
+	<< "nearThreshold: " << nearThreshold << ", farThreshold: " << farThreshold << endl
 	<< "DX: " << DX << ", DY: " << DY << endl
 	<< "ZOOM: " << ZOOM << ", DEGREES: " << DEGREES << endl
-	<< "handSmoother: " << handSmoother
-	<< "scaleup: " << scaleup
+	<< "scaleup: " << scaleup << endl
+	<< "handSmoother: " << handSmoother 
 	// << "MAX_HAND_SIZE: " << contourFinder.MAX_HAND_SIZE << endl
 	// << "MIN_HAND_SIZE: " << contourFinder.MIN_HAND_SIZE
 	// << "Near threshold: " << nearThreshold << endl
 	// << "Far threshold: " << farThreshold 
 	<< endl;
 	ofDrawBitmapString(reportStream.str(), 20, 652);
+	ofPopStyle();
 
 }
 
@@ -85,7 +98,17 @@ void ofApp::drawHandOverlay() {
 	ofScale(ZOOM, ZOOM);
 	ofRotateZ(DEGREES);
 
-	//inputImg.draw(0,0);
+	if( dispMode == 1 ) {
+		inputImg.draw(0,0);
+		return;
+	}
+
+	if( dispMode == 2 ) {
+		threshImg.draw(0,0);
+		return;
+	}
+
+	ofSetColor(0, 255, 0);
 	contourFinder.draw();
 	drawLabels();
 
@@ -96,7 +119,6 @@ void ofApp::drawHandOverlay() {
 			ofPushMatrix();
 
 			//float scaleup = 1.5;
-			ofSetColor(0, 255, 3);
 			ofPolyline smoothHand = contourFinder.hands[i].getSmoothed(handSmoother);
 			ofPoint centroid = smoothHand.getCentroid2D();
 			ofTranslate(centroid.x*(1-scaleup), centroid.y*(1-scaleup));
@@ -229,6 +251,12 @@ void ofApp::keyPressed(int key){
 
 		case 'u':
 			scaleup *= 0.9;
+			break;
+
+		case 'm':
+			dispMode++;
+			if( dispMode > 2 )
+				dispMode = 0;
 			break;
 		
 	}

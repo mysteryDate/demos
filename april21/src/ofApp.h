@@ -24,6 +24,8 @@ class ofApp : public ofBaseApp{
 		ofxCvGrayscaleImage		inputImg;	// Raw input form kinect
 		ofxCvGrayscaleImage		threshImg;	// After thresholding
 
+		ofImage background;
+
 		ArmContourFinder		contourFinder;
 
 		void drawHandOverlay();
@@ -35,5 +37,9 @@ class ofApp : public ofBaseApp{
 
 		int handSmoother;
 		float scaleup;
+
+		
+		// Just for showing raw
+		int dispMode;
 		
 };

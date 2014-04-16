@@ -34,6 +34,7 @@ public:
 	int MAX_MOVEMENT_DISTANCE;
 	int SURVIVAL_FRAMES;
 
+
 private:
 
 	vector< int > bounds;

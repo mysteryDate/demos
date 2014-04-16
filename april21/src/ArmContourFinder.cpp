@@ -25,6 +25,7 @@ void ArmContourFinder::update() {
 	ends.resize(size);
 	wrists.resize(size);
 	tips.resize(size);
+	hands.resize(size);
 	handFound.resize(size, false);
 
 	for (int i = 0; i < size; ++i)
@@ -35,6 +36,9 @@ void ArmContourFinder::update() {
 		else {
 			handFound[i] = findHand(i);
 		}
+		if(handFound[i]) {
+			addHand(i);
+		}
 	}
 }
 
@@ -44,6 +48,10 @@ void ArmContourFinder::updateArm(int n) {
 	ofVec2f velocity = ofxCv::toOf(getVelocity(n));
 	
 	vector< ofPoint > newEnds = findEnds(n);
+	if( newEnds.size() != 2 ) {
+		handFound[n] = false;
+		return;
+	}
 	ofPoint newTip = findTip(n, newEnds);
 	vector< ofPoint > newWrists = findWrists(n, newTip, newEnds);
 	if( newWrists.size() != 2 ) {
@@ -62,6 +70,27 @@ void ArmContourFinder::updateArm(int n) {
 		*keypoints[i] = newKeypoints[i];
 	}
 	
+
+}
+
+void ArmContourFinder::addHand(int n) {
+
+	hands[n].clear();
+	unsigned int start, end;
+	polylines[n].getClosestPoint(wrists[n][1], &start);
+	polylines[n].getClosestPoint(wrists[n][0], &end);
+
+	int i = start;
+	while( i != end ) {
+		hands[n].addVertex( polylines[n][i] );
+		i++;
+		if( i == polylines[n].size() )
+			i = 0;
+	}
+	// So that it closes up;
+	hands[n].addVertex( polylines[n][start] );
+
+
 
 }
 

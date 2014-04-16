@@ -42,5 +42,6 @@ private:
 	vector< ofPoint > 	findWrists(int n, ofPoint newTip, vector< ofPoint > newEnds);
 
 	void updateArm(int n);
+	void addHand(int n);
 
 };

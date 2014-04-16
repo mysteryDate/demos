@@ -55,18 +55,20 @@ void ofApp::update(){
 void ofApp::draw(){
 
 	//inputImg.draw(0, 0, kinect.width, kinect.height);
-	threshImg.draw(0, 0, kinect.width, kinect.height);
+	//threshImg.draw(0, 0, kinect.width, kinect.height);
 	contourFinder.draw();
 
-	ofSetColor(255, 0, 255);
 	for (int i = 0; i < contourFinder.size(); ++i)
 	{
 		if(contourFinder.handFound[i]) {
+			ofSetColor(255, 0, 255);
 			ofCircle(contourFinder.ends[i][0], 3);
 			ofCircle(contourFinder.ends[i][1], 3);
 			ofCircle(contourFinder.tips[i], 3);
 			ofCircle(contourFinder.wrists[i][0], 3);
 			ofCircle(contourFinder.wrists[i][1], 3);
+			ofSetColor(0, 255, 0);
+			contourFinder.hands[i].draw();
 		}
 	}
 

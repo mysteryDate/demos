@@ -82,7 +82,7 @@ void ofApp::draw(){
 	// << "Far threshold: " << farThreshold 
 	<< endl;
 
-	//ofDrawBitmapString(reportStream.str(), 20, 652);
+	ofDrawBitmapString(reportStream.str(), 20, 652);
 
 }
 

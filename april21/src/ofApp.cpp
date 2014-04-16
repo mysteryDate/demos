@@ -61,17 +61,26 @@ void ofApp::draw(){
 	ofSetColor(255, 0, 255);
 	for (int i = 0; i < contourFinder.size(); ++i)
 	{
-		if(contourFinder.ends[i].size() == 2) {
-			ofCircle(contourFinder.ends[i][0], 10);
-			ofCircle(contourFinder.ends[i][1], 10);
+		if(contourFinder.handFound[i]) {
+			ofCircle(contourFinder.ends[i][0], 3);
+			ofCircle(contourFinder.ends[i][1], 3);
 			ofCircle(contourFinder.tips[i], 3);
+			ofCircle(contourFinder.wrists[i][0], 3);
+			ofCircle(contourFinder.wrists[i][1], 3);
+			ofNoFill();
+			ofCircle(contourFinder.tips[i], contourFinder.MAX_HAND_SIZE);
+			ofCircle(contourFinder.tips[i], contourFinder.MIN_HAND_SIZE);
 		}
 	}
 
 	ofSetColor(255, 255, 255);
 	stringstream reportStream;
-	reportStream << "Near threshold: " << nearThreshold << endl
-	<< "Far threshold: " << farThreshold << endl;
+	reportStream 
+	<< "MAX_HAND_SIZE: " << contourFinder.MAX_HAND_SIZE << endl
+	<< "MIN_HAND_SIZE: " << contourFinder.MIN_HAND_SIZE
+	// << "Near threshold: " << nearThreshold << endl
+	// << "Far threshold: " << farThreshold 
+	<< endl;
 
 	//ofDrawBitmapString(reportStream.str(), 20, 652);
 
@@ -108,6 +117,22 @@ void ofApp::keyPressed(int key){
 		case '-':
 			nearThreshold --;
 			if (nearThreshold < 0) nearThreshold = 0;
+			break;
+
+		case 'H':
+			contourFinder.MAX_HAND_SIZE++;
+			break;
+
+		case 'h':
+			contourFinder.MAX_HAND_SIZE--;
+			break;
+
+		case 'G':
+			contourFinder.MIN_HAND_SIZE++;
+			break;
+
+		case 'g':
+			contourFinder.MIN_HAND_SIZE--;
 			break;
 	}
 

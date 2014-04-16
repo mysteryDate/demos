@@ -16,11 +16,6 @@ public:
 	// Matrix of how many skips have happened, first dimension is id, then end1, end2, tip
 	vector< vector< int > > skippedFrames;
 
-	// Not the best way to do this, but it'll do for now
-	vector< vector < unsigned int > > endIndeces;
-	vector< unsigned int > tipIndeces;
-	vector< vector < unsigned int > > wristIndeces;
-
 	vector< bool > handFound;
 
 	vector< ofPolyline > simplifiedPolylines;
@@ -28,12 +23,7 @@ public:
 
 	void update();
 	
-	void findHand(int n);
-
-
-private:
-
-	vector< int > bounds;
+	bool findHand(int n);
 
 	float tolerance;
 	float SMOOTHING_RATE;
@@ -42,5 +32,14 @@ private:
 	int MAX_HAND_SIZE;
 	int MAX_MOVEMENT_DISTANCE;
 	int SURVIVAL_FRAMES;
+
+private:
+
+	vector< int > bounds;
+
+
+	vector< ofPoint > 	findEnds(int n);
+	ofPoint				findTip(int n, vector< ofPoint > newEnds);
+	vector< ofPoint > 	findWrists(int n, ofPoint newTip, vector< ofPoint > newEnds);
 
 };

@@ -5,12 +5,13 @@ ArmContourFinder::ArmContourFinder() {
 	bounds.push_back(0);
 	bounds.push_back(0);
 	bounds.push_back(630);
-	bounds.push_back(400);
+	bounds.push_back(410);
 
 	setMinArea(50);
 
 	MIN_HAND_SIZE = 50;
 	MAX_HAND_SIZE = 115;
+	MAX_WRIST_WIDTH = 40;
 
 	MAX_MOVEMENT_DISTANCE = 20;
 	SMOOTHING_RATE = 0.5;
@@ -234,14 +235,14 @@ vector < ofPoint > ArmContourFinder::findWrists(int n, ofPoint newTip, vector< o
 	}
 
 	// Now find the closest two points on these lines
-	float shortestDist = 999999;
+	float shortestDist = MAX_WRIST_WIDTH * MAX_WRIST_WIDTH + 1;
 	vector< ofPoint > possibleWrists;
 	for (int i = 0; i < sideOne.size(); ++i)
 	{
 		for (int j = 0; j < sideTwo.size(); ++j)
 		{
 			distSquared = ofDistSquared(sideOne[i].x, sideOne[i].y, sideTwo[j].x, sideTwo[j].y);
-			if(distSquared < shortestDist) {
+			if(distSquared < shortestDist and distSquared <= MAX_WRIST_WIDTH * MAX_WRIST_WIDTH) {
 				possibleWrists.resize(2);
 				possibleWrists[0] = sideOne[i];
 				possibleWrists[1] = sideTwo[j];

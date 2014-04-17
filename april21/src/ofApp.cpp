@@ -173,19 +173,19 @@ void ofApp::drawHandOverlay() {
 
 			ofTranslate(centroid.x, centroid.y);
 
-			// float hypotenuse = sqrt( pow(centroid.x - contourFinder.tips[i].x, 2) + pow(centroid.y - contourFinder.tips[i].y, 2) );
-			// float angle =  ofRadToDeg( asin( (contourFinder.tips[i].y - centroid.y) / hypotenuse ));
-			// if(contourFinder.tips[i].x < centroid.x ) angle *= -1;
-			// ofRotateZ(angle);
+			float hypotenuse = sqrt( pow(centroid.x - contourFinder.tips[i].x, 2) + pow(centroid.y - contourFinder.tips[i].y, 2) );
+			float angle =  ofRadToDeg( asin( (contourFinder.tips[i].y - centroid.y) / hypotenuse ));
+			if(contourFinder.tips[i].x < centroid.x ) angle *= -1;
+			ofRotateZ(angle);
 			ofPoint exit = contourFinder.ends[i][0];
-			if (exit.x <= 5) ofRotateZ(90);
+			if (exit.x <= 5) ofRotateZ(180);
 			else if (exit.y <= 5) ofRotateZ(180);
-			else if (exit.x >= 625) ofRotateZ(-90);
+			else if (exit.x >= 625) ofRotateZ(0);
 
 			ofScale(0.5, 0.5);
 			ofSetColor(255,255,255);
 			ofSetDrawBitmapMode(OF_BITMAPMODE_MODEL);
-			ofDrawBitmapString("Riviere\ndes Outaouais", -30, 0);
+			ofDrawBitmapString("Riviere des\nOutaouais", -45, 0);
 
 			// myfont.drawString("Rivière des Outaouais", -20, 0);
 

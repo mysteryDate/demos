@@ -56,5 +56,9 @@ class ofApp : public ofBaseApp{
 		#else
 		ofVideoPlayer	kinect;
 		#endif
+
+		// For getting water region
+		void mousePressed(int x, int y, int button);
+		ofPolyline waterRegion;
 		
 };

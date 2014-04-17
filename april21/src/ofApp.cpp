@@ -108,6 +108,11 @@ void ofApp::draw(){
 	ofDrawBitmapString(reportStream.str(), 20, 652);
 	ofPopStyle();
 
+	ofPushStyle();
+	ofSetColor(0,0,255);
+	waterRegion.draw();
+	ofPopStyle();
+
 }
 
 void ofApp::drawHandOverlay() {
@@ -252,6 +257,14 @@ void ofApp::exit(){
 }
 
 //--------------------------------------------------------------
+void ofApp::mousePressed(int x, int y, int button) 
+{
+
+	waterRegion.addVertex(x,y);
+
+}
+
+//--------------------------------------------------------------
 void ofApp::keyPressed(int key){
 
 	switch (key) {
@@ -348,6 +361,28 @@ void ofApp::keyPressed(int key){
 				dispMode = 0;
 			break;
 		
+		case ' ':{
+			string waterVerteces;
+			for (int i = 0; i < waterRegion.size(); ++i)
+			{
+				waterVerteces.append(ofToString(waterRegion[i].x));
+				waterVerteces.append("\n");
+				waterVerteces.append(ofToString(waterRegion[i].y));
+				waterVerteces.append("\n");
+			}
+			ofBuffer buff;
+			buff.set(waterVerteces.c_str(), waterVerteces.size());
+			ofBufferToFile("verteces.txt", buff);
+			break;
+		}
+
+		case 'W':
+			ofBuffer buff2 = ofBufferFromFile("verteces.txt");
+			while(!buff2.isLastLine() ) {
+				int x = std::atoi( buff2.getNextLine().c_str() );
+				int y = std::atoi( buff2.getNextLine().c_str() );
+				waterRegion.addVertex(x, y);
+			}
 	}
 
 }

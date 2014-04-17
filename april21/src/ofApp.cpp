@@ -4,11 +4,19 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
 
-	kinect.init();
-	kinect.open();
+	#ifdef _USE_LIVE_VIDEO
+		kinect.init();
+		kinect.open();
+		inputImg.allocate(kinect.width, kinect.height);
+		threshImg.allocate(kinect.width, kinect.height);
+	#else
+		kinect.loadMovie("onehand.mov");
+		kinect.play();
+		colorImg.allocate(640, 480);
+		inputImg.allocate(640, 480);
+		threshImg.allocate(640, 480);
+	#endif
 
-	inputImg.allocate(kinect.width, kinect.height);
-	threshImg.allocate(kinect.width, kinect.height);
 
 	background.loadImage("rivers.jpg");
 	background.setImageType(OF_IMAGE_COLOR);
@@ -40,8 +48,14 @@ void ofApp::update(){
 
 	if(kinect.isFrameNew()) {
 
+		#ifdef _USE_LIVE_VIDEO
 		inputImg.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height);
 		threshImg.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height);
+		#else
+		colorImg.setFromPixels(kinect.getPixels(), 640, 480);
+		inputImg = colorImg;
+		threshImg = colorImg;
+		#endif
 
 		// Threshold the image
 		unsigned char * pix = threshImg.getPixels();
@@ -114,7 +128,7 @@ void ofApp::drawHandOverlay() {
 	}
 
 	ofSetColor(0, 255, 0);
-	//contourFinder.draw();
+	contourFinder.draw();
 	//drawLabels();
 
 	for (int i = 0; i < contourFinder.size(); ++i)
@@ -123,22 +137,30 @@ void ofApp::drawHandOverlay() {
 			ofPushStyle();
 			ofPushMatrix();
 
+			ofSetColor(255,0,0);
+			ofCircle(contourFinder.ends[i][0], 1);
+			ofCircle(contourFinder.ends[i][1], 1);
+			ofSetColor(0,255,255);
+			ofCircle(contourFinder.tips[i], 1);
+			ofCircle(contourFinder.wrists[i][0], 1);
+			ofCircle(contourFinder.wrists[i][1], 1);
+
 			//float scaleup = 1.5;
 			ofPolyline smoothHand = contourFinder.hands[i].getSmoothed(handSmoother);
 			ofPoint centroid = smoothHand.getCentroid2D();
 			ofTranslate(centroid.x*(1-scaleup), centroid.y*(1-scaleup));
 			ofScale(scaleup, scaleup);
 
-			ofPushStyle();
-			ofSetColor(0,0,0);
-			ofFill();
-			ofBeginShape();
-			for (int i = 0; i < smoothHand.size(); ++i)
-			{
-				ofVertex(smoothHand[i].x, smoothHand[i].y);
-			}
-			ofEndShape();
-			ofPopStyle();
+			// ofPushStyle();
+			// ofSetColor(0,0,0);
+			// ofFill();
+			// ofBeginShape();
+			// for (int i = 0; i < smoothHand.size(); ++i)
+			// {
+			// 	ofVertex(smoothHand[i].x, smoothHand[i].y);
+			// }
+			// ofEndShape();
+			// ofPopStyle();
 
 			// smoothHand.draw();
 			// ofCircle(centroid, 3);

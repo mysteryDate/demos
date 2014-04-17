@@ -7,7 +7,7 @@
 #include "ofxKinect.h"
 #include <cmath>
 
-//#define _USE_LIVE_VIDEO		// uncomment this to use live kinect data
+#define _USE_LIVE_VIDEO		// uncomment this to use live kinect data
 
 class ofApp : public ofBaseApp{
 

@@ -5,7 +5,7 @@ ArmContourFinder::ArmContourFinder() {
 	bounds.push_back(0);
 	bounds.push_back(0);
 	bounds.push_back(630);
-	bounds.push_back(410);
+	bounds.push_back(470);
 
 	setMinArea(50);
 

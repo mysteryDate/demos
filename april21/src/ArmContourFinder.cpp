@@ -5,7 +5,7 @@ ArmContourFinder::ArmContourFinder() {
 	bounds.push_back(0);
 	bounds.push_back(0);
 	bounds.push_back(630);
-	bounds.push_back(480);
+	bounds.push_back(400);
 
 	setMinArea(50);
 
@@ -13,7 +13,7 @@ ArmContourFinder::ArmContourFinder() {
 	MAX_HAND_SIZE = 115;
 
 	MAX_MOVEMENT_DISTANCE = 20;
-	SMOOTHING_RATE = 0.9;
+	SMOOTHING_RATE = 0.5;
 
 }
 

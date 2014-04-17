@@ -18,14 +18,14 @@ void ofApp::setup(){
 	ofSetFrameRate(60);
 
 	// Good for kinect in present orientation
-	DX = -28;
-	DY = -8;
+	DX = -35;
+	DY = -84;
 	ZOOM = 2.57;
 	DEGREES = 0;
 
 	handSmoother = 4;
 
-	scaleup = 1;
+	scaleup = 1.1;
 
 	dispMode = 0;
 }
@@ -109,7 +109,7 @@ void ofApp::drawHandOverlay() {
 	}
 
 	ofSetColor(0, 255, 0);
-	contourFinder.draw();
+	//contourFinder.draw();
 	drawLabels();
 
 	for (int i = 0; i < contourFinder.size(); ++i)
@@ -126,6 +126,10 @@ void ofApp::drawHandOverlay() {
 
 			smoothHand.draw();
 			ofCircle(centroid, 3);
+			ofSetColor(255,0,0);
+			ofCircle(contourFinder.tips[i], 2);
+			ofCircle(contourFinder.wrists[i][0], 2);
+			ofCircle(contourFinder.wrists[i][1], 2);
 
 			ofPopMatrix();
 			ofPopStyle();

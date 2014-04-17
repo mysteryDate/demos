@@ -38,7 +38,55 @@ void ofApp::setup(){
 
 	dispMode = 0;
 
-	myfont.loadFont("helveticaneue.ttf", 5);
+	// myfont.loadFont("helveticaneue.ttf", 5);
+
+	ofBuffer buff2 = ofBufferFromFile("verteces.txt");
+	while(!buff2.isLastLine() ) {
+		int x = std::atoi( buff2.getNextLine().c_str() );
+		int y = std::atoi( buff2.getNextLine().c_str() );
+		waterRegion.addVertex(x, y);
+	}
+	waterRegion.close();
+	waterRegion = waterRegion.getSmoothed(4);
+
+	riverRegions.resize(5);
+	for (int i = 0; i < riverRegions.size(); ++i)
+	{
+		string filename;
+		switch (i) {
+			case 0:
+				filename = "outaouais.txt";
+				break;
+			case 1:
+				filename = "nord.txt";
+				break;
+			case 2:
+				filename = "ouest.txt";
+				break;
+			case 3:
+				filename = "calumet.txt";
+				break;
+			case 4:
+				filename = "rouge.txt";
+				break;
+			
+		}
+		buff2 = ofBufferFromFile(filename);
+		while(!buff2.isLastLine() ) {
+			int x = std::atoi( buff2.getNextLine().c_str() );
+			int y = std::atoi( buff2.getNextLine().c_str() );
+			riverRegions[i].addVertex(x, y);
+		}
+		riverRegions[i].close();
+		//riverRegions[i] = riverRegions[i].getSmoothed(3);
+	}
+
+	riverNames[0] = "Riviere des\nOutaouais";
+	riverNames[1] = "Riviere\ndu Nord";
+	riverNames[2] = "Riviere\nOuest";
+	riverNames[3] = "Riviere\nCalumet";
+	riverNames[4] = "Riviere\nRouge";
+
 }
 
 //--------------------------------------------------------------
@@ -90,6 +138,22 @@ void ofApp::draw(){
 	ofPopMatrix();
 
 	ofPushStyle();
+	ofSetColor(0,0,255);
+	ofFill();
+	ofBeginShape();
+	for (int i = 0; i < waterRegion.size(); ++i)
+	{
+		ofVertex(waterRegion[i].x, waterRegion[i].y);
+	}
+	ofEndShape();
+	ofPopStyle();
+
+	// ofPushStyle();
+	// ofSetColor(255,0,255);
+	// riverRegions[4].draw();
+	// ofPopStyle();
+
+	ofPushStyle();
 	drawHandOverlay();
 
 	ofSetColor(0, 0, 0);
@@ -108,10 +172,6 @@ void ofApp::draw(){
 	ofDrawBitmapString(reportStream.str(), 20, 652);
 	ofPopStyle();
 
-	ofPushStyle();
-	ofSetColor(0,0,255);
-	waterRegion.draw();
-	ofPopStyle();
 
 }
 
@@ -173,6 +233,17 @@ void ofApp::drawHandOverlay() {
 			ofPopMatrix();
 			ofPopStyle();
 
+			string palmText;
+			ofPoint newCentroid = ofPoint(centroid.x*ZOOM + DX, centroid.y*ZOOM + DY);		
+			for (int i = 0; i < riverRegions.size(); ++i)
+			{
+				if( riverRegions[i].inside(newCentroid) ) {
+					palmText = riverNames[i];
+				}
+			}
+
+			palmText = ofToString(palmText);
+
 			ofPushMatrix();
 			ofPushStyle();
 
@@ -190,7 +261,8 @@ void ofApp::drawHandOverlay() {
 			ofScale(0.5, 0.5);
 			ofSetColor(255,255,255);
 			ofSetDrawBitmapMode(OF_BITMAPMODE_MODEL);
-			ofDrawBitmapString("Riviere des\nOutaouais", -45, 0);
+
+			ofDrawBitmapString(palmText, -45, 0);
 
 			// myfont.drawString("Rivière des Outaouais", -20, 0);
 
@@ -260,7 +332,9 @@ void ofApp::exit(){
 void ofApp::mousePressed(int x, int y, int button) 
 {
 
-	waterRegion.addVertex(x,y);
+	// riverRegions[4].addVertex(x,y);
+
+
 
 }
 
@@ -362,17 +436,17 @@ void ofApp::keyPressed(int key){
 			break;
 		
 		case ' ':{
-			string waterVerteces;
-			for (int i = 0; i < waterRegion.size(); ++i)
+			string riverVerteces;
+			for (int i = 0; i < riverRegions[4].size(); ++i)
 			{
-				waterVerteces.append(ofToString(waterRegion[i].x));
-				waterVerteces.append("\n");
-				waterVerteces.append(ofToString(waterRegion[i].y));
-				waterVerteces.append("\n");
+				riverVerteces.append(ofToString(riverRegions[4][i].x));
+				riverVerteces.append("\n");
+				riverVerteces.append(ofToString(riverRegions[4][i].y));
+				riverVerteces.append("\n");
 			}
 			ofBuffer buff;
-			buff.set(waterVerteces.c_str(), waterVerteces.size());
-			ofBufferToFile("verteces.txt", buff);
+			buff.set(riverVerteces.c_str(), riverVerteces.size());
+			ofBufferToFile("rouge.txt", buff);
 			break;
 		}
 
@@ -381,8 +455,10 @@ void ofApp::keyPressed(int key){
 			while(!buff2.isLastLine() ) {
 				int x = std::atoi( buff2.getNextLine().c_str() );
 				int y = std::atoi( buff2.getNextLine().c_str() );
-				waterRegion.addVertex(x, y);
+				riverRegions[2].addVertex(x, y);
 			}
+			riverRegions[2].close();
+			//riverRegions[1] = waterRegion.getSmoothed(4);
 	}
 
 }

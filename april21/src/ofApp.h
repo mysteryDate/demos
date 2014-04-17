@@ -60,5 +60,9 @@ class ofApp : public ofBaseApp{
 		// For getting water region
 		void mousePressed(int x, int y, int button);
 		ofPolyline waterRegion;
+
+		// For displaying the proper texts
+		const char *riverNames [5];
+		vector < ofPolyline > riverRegions;
 		
 };

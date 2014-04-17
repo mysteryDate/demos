@@ -14,7 +14,7 @@ ArmContourFinder::ArmContourFinder() {
 	MAX_WRIST_WIDTH = 40;
 
 	MAX_MOVEMENT_DISTANCE = 20;
-	SMOOTHING_RATE = 0.1;
+	SMOOTHING_RATE = 0.5;
 
 }
 
@@ -55,15 +55,16 @@ void ArmContourFinder::update() {
 
 	for (int i = 0; i < size; ++i)
 	{
+		polylines[i] = polylines[i].getSmoothed(4);
 		oldLabels[i] = getLabel(i);
 		if(handFound[i]) {
 			updateArm(i);
 		}
 		else {
 			handFound[i] = findHand(i);
-		}
-		if(handFound[i]) {
-			addHand(i);
+			if(handFound[i]) {
+				addHand(i);
+			}
 		}
 	}
 }
@@ -87,14 +88,23 @@ void ArmContourFinder::updateArm(int n) {
 
 	ofPoint newKeypoints [] = {newEnds[0], newEnds[1], newTip, newWrists[0], newWrists[1]};
 
+	//if within a minimum dist, don't move at all
+	int noiseDist = 100;
+	float changed = false;
+
 	for (int i = 0; i < 5; ++i)
 	{
-		float smoothedX = ofLerp(keypoints[i]->x, newKeypoints[i].x, SMOOTHING_RATE);
-		float smoothedY = ofLerp(keypoints[i]->y, newKeypoints[i].y, SMOOTHING_RATE);
-		newKeypoints[i] = ofPoint(smoothedX, smoothedY);
-		*keypoints[i] = newKeypoints[i];
+		if( ofDistSquared(keypoints[i]->x, keypoints[i]->y, newKeypoints[i].x, newKeypoints[i].y ) > noiseDist ) {
+			float smoothedX = ofLerp(keypoints[i]->x, newKeypoints[i].x, SMOOTHING_RATE);
+			float smoothedY = ofLerp(keypoints[i]->y, newKeypoints[i].y, SMOOTHING_RATE);
+			newKeypoints[i] = ofPoint(smoothedX, smoothedY);
+			*keypoints[i] = newKeypoints[i];
+			changed = true;
+		}
 	}
 	
+	if(changed)
+		addHand(n);
 
 }
 

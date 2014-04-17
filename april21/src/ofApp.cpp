@@ -128,7 +128,7 @@ void ofApp::drawHandOverlay() {
 	}
 
 	ofSetColor(0, 255, 0);
-	contourFinder.draw();
+	//contourFinder.draw();
 	//drawLabels();
 
 	for (int i = 0; i < contourFinder.size(); ++i)
@@ -137,13 +137,13 @@ void ofApp::drawHandOverlay() {
 			ofPushStyle();
 			ofPushMatrix();
 
-			ofSetColor(255,0,0);
-			ofCircle(contourFinder.ends[i][0], 1);
-			ofCircle(contourFinder.ends[i][1], 1);
-			ofSetColor(0,255,255);
-			ofCircle(contourFinder.tips[i], 1);
-			ofCircle(contourFinder.wrists[i][0], 1);
-			ofCircle(contourFinder.wrists[i][1], 1);
+			// ofSetColor(255,0,0);
+			// ofCircle(contourFinder.ends[i][0], 1);
+			// ofCircle(contourFinder.ends[i][1], 1);
+			// ofSetColor(0,255,255);
+			// ofCircle(contourFinder.tips[i], 1);
+			// ofCircle(contourFinder.wrists[i][0], 1);
+			// ofCircle(contourFinder.wrists[i][1], 1);
 
 			//float scaleup = 1.5;
 			ofPolyline smoothHand = contourFinder.hands[i].getSmoothed(handSmoother);
@@ -151,18 +151,18 @@ void ofApp::drawHandOverlay() {
 			ofTranslate(centroid.x*(1-scaleup), centroid.y*(1-scaleup));
 			ofScale(scaleup, scaleup);
 
-			// ofPushStyle();
-			// ofSetColor(0,0,0);
-			// ofFill();
-			// ofBeginShape();
-			// for (int i = 0; i < smoothHand.size(); ++i)
-			// {
-			// 	ofVertex(smoothHand[i].x, smoothHand[i].y);
-			// }
-			// ofEndShape();
-			// ofPopStyle();
+			ofPushStyle();
+			ofSetColor(0,0,0);
+			ofFill();
+			ofBeginShape();
+			for (int i = 0; i < smoothHand.size(); ++i)
+			{
+				ofVertex(smoothHand[i].x, smoothHand[i].y);
+			}
+			ofEndShape();
+			ofPopStyle();
 
-			// smoothHand.draw();
+			smoothHand.draw();
 			// ofCircle(centroid, 3);
 			
 			ofPopMatrix();

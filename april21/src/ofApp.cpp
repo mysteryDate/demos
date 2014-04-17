@@ -1,5 +1,6 @@
 #include "ofApp.h"
 
+
 //--------------------------------------------------------------
 void ofApp::setup(){
 
@@ -28,6 +29,8 @@ void ofApp::setup(){
 	scaleup = 1.1;
 
 	dispMode = 0;
+
+	myfont.loadFont("helveticaneue.ttf", 5);
 }
 
 //--------------------------------------------------------------
@@ -110,7 +113,7 @@ void ofApp::drawHandOverlay() {
 
 	ofSetColor(0, 255, 0);
 	//contourFinder.draw();
-	drawLabels();
+	//drawLabels();
 
 	for (int i = 0; i < contourFinder.size(); ++i)
 	{
@@ -124,20 +127,78 @@ void ofApp::drawHandOverlay() {
 			ofTranslate(centroid.x*(1-scaleup), centroid.y*(1-scaleup));
 			ofScale(scaleup, scaleup);
 
-			smoothHand.draw();
-			ofCircle(centroid, 3);
-			ofSetColor(255,0,0);
-			ofCircle(contourFinder.tips[i], 2);
-			ofCircle(contourFinder.wrists[i][0], 2);
-			ofCircle(contourFinder.wrists[i][1], 2);
+			ofPushStyle();
+			ofSetColor(0,0,0);
+			ofFill();
+			ofBeginShape();
+			for (int i = 0; i < smoothHand.size(); ++i)
+			{
+				ofVertex(smoothHand[i].x, smoothHand[i].y);
+			}
+			ofEndShape();
+			ofPopStyle();
+
+			// smoothHand.draw();
+			// ofCircle(centroid, 3);
+			
+			ofPopMatrix();
+			ofPopStyle();
+
+			ofPushMatrix();
+			ofPushStyle();
+
+			ofTranslate(centroid.x, centroid.y);
+
+			// float hypotenuse = sqrt( pow(centroid.x - contourFinder.tips[i].x, 2) + pow(centroid.y - contourFinder.tips[i].y, 2) );
+			// float angle =  ofRadToDeg( asin( (contourFinder.tips[i].y - centroid.y) / hypotenuse ));
+			// if(contourFinder.tips[i].x < centroid.x ) angle *= -1;
+			// ofRotateZ(angle);
+			ofPoint exit = contourFinder.ends[i][0];
+			if (exit.x <= 5) ofRotateZ(90);
+			else if (exit.y <= 5) ofRotateZ(180);
+			else if (exit.x >= 625) ofRotateZ(-90);
+
+			ofScale(0.5, 0.5);
+			ofSetColor(255,255,255);
+			ofSetDrawBitmapMode(OF_BITMAPMODE_MODEL);
+			ofDrawBitmapString("Riviere\ndes Outaouais", -30, 0);
+
+			// myfont.drawString("Rivière des Outaouais", -20, 0);
 
 			ofPopMatrix();
 			ofPopStyle();
+
+			// vector< ofPoint > orientationEnds = findMostDistantPoints(smoothHand);
+			// ofLine(orientationEnds[0], orientationEnds[1]);
+
 
 		}
 	}
 
 	ofPopMatrix();
+}
+
+vector< ofPoint > ofApp::findMostDistantPoints(ofPolyline line)
+{
+
+	float maxDsquared = 0;
+	vector< ofPoint > mostDistant;
+	mostDistant.resize(2);
+	for (int i = 0; i < line.size(); ++i)
+	{
+		for (int j = 0; j < line.size(); ++j)
+		{
+			float d = ofDistSquared(line[i].x, line[i].y, line[j].x, line[j].y);
+			if( d > maxDsquared ) {
+				maxDsquared = d;
+				mostDistant[0] = line[i];
+				mostDistant[1] = line[j];
+			}
+		}
+	}
+
+	return mostDistant;
+
 }
 
 void ofApp::drawLabels() {

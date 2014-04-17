@@ -10,11 +10,11 @@ ArmContourFinder::ArmContourFinder() {
 	setMinArea(50);
 
 	MIN_HAND_SIZE = 50;
-	MAX_HAND_SIZE = 115;
+	MAX_HAND_SIZE = 90;
 	MAX_WRIST_WIDTH = 40;
 
 	MAX_MOVEMENT_DISTANCE = 20;
-	SMOOTHING_RATE = 0.5;
+	SMOOTHING_RATE = 0.1;
 
 }
 
@@ -89,8 +89,8 @@ void ArmContourFinder::updateArm(int n) {
 
 	for (int i = 0; i < 5; ++i)
 	{
-		float smoothedX = ofLerp(newKeypoints[i].x, keypoints[i]->x, SMOOTHING_RATE);
-		float smoothedY = ofLerp(newKeypoints[i].y, keypoints[i]->y, SMOOTHING_RATE);
+		float smoothedX = ofLerp(keypoints[i]->x, newKeypoints[i].x, SMOOTHING_RATE);
+		float smoothedY = ofLerp(keypoints[i]->y, newKeypoints[i].y, SMOOTHING_RATE);
 		newKeypoints[i] = ofPoint(smoothedX, smoothedY);
 		*keypoints[i] = newKeypoints[i];
 	}

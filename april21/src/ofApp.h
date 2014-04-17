@@ -5,6 +5,7 @@
 #include "ofxCv.h"
 #include "ArmContourFinder.h"
 #include "ofxKinect.h"
+#include <cmath>
 
 class ofApp : public ofBaseApp{
 
@@ -41,5 +42,10 @@ class ofApp : public ofBaseApp{
 		
 		// Just for showing raw
 		int dispMode;
+
+		vector< ofPoint > findMostDistantPoints(ofPolyline line);
+
+		// For text
+		ofTrueTypeFont myfont;
 		
 };

@@ -7,6 +7,8 @@
 #include "ofxKinect.h"
 #include <cmath>
 
+//#define _USE_LIVE_VIDEO		// uncomment this to use live kinect data
+
 class ofApp : public ofBaseApp{
 
 	public:
@@ -18,12 +20,12 @@ class ofApp : public ofBaseApp{
 		void keyPressed(int key);
 
 		// Variables for input processing
-		ofxKinect 	kinect;
 		int 		nearThreshold;
 		int 		farThreshold;
 
 		ofxCvGrayscaleImage		inputImg;	// Raw input form kinect
 		ofxCvGrayscaleImage		threshImg;	// After thresholding
+		ofxCvColorImage			colorImg;	// Because video
 
 		ofImage background;
 
@@ -47,5 +49,12 @@ class ofApp : public ofBaseApp{
 
 		// For text
 		ofTrueTypeFont myfont;
+
+		// For video
+		#ifdef _USE_LIVE_VIDEO
+		ofxKinect 	kinect;
+		#else
+		ofVideoPlayer	kinect;
+		#endif
 		
 };

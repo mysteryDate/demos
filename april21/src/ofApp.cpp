@@ -56,6 +56,8 @@ void ofApp::update(){
 		}
 	}
 
+
+
 	threshImg.flagImageChanged();
 
 	contourFinder.findContours(threshImg);

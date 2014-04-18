@@ -5,9 +5,9 @@
 #define KINECT_CROP_TOP 14
 #define KINECT_CROP_BOTTOM 27
 
-#define INPUT_DATA_ZOOM 1
-#define INPUT_DATA_DX 0
-#define	INPUT_DATA_DY 0
+#define INPUT_DATA_ZOOM 2.57
+#define INPUT_DATA_DX 40
+#define	INPUT_DATA_DY -64
 #define INPUT_DATA_R 0
 
 #define VIDEO_X -78
@@ -20,6 +20,7 @@
 #include "ofxOpenCv.h"
 #include "ofxCv.h"
 #include "ofxKinect.h"
+#include "ArmContourFinder.h"
 #include <cmath>
 
 class ofApp : public ofBaseApp{
@@ -31,22 +32,34 @@ class ofApp : public ofBaseApp{
 		void exit();
 
 		void keyPressed(int key);
-		void mousePressed(int x, int y, int button);
+		// void mousePressed(int x, int y, int button);
 
 		void transformInput();
+		void drawHandOverlay();
 
-		ofxKinect kinect;
-
-		ofVideoPlayer video;		
-
-		ofImage		videoImg;
-
+		// Input Processing
+		ofxKinect 			kinect;
+		ofVideoPlayer 		video;		
+		ofImage				videoImg;
 		ofxCvGrayscaleImage	kinectImg;
 		ofxCvGrayscaleImage processedImg;
+		int 				nearThreshold;
+		int 				farThreshold;
 
-		int nearThreshold;
-		int farThreshold;
+		// Cv
+        ArmContourFinder	contourFinder;
 
+		// Display variables
+		int 				lineSmoothing;
+		float 				handScaleUp;
+
+
+		// For defining regions
+		ofPolyline			waterRegion;
+		vector< ofPolyline>	riverRegions;
+		const char * 		riverNames[5];
+
+		// Calibration
 		float x, y, w, h, r;
 
 };

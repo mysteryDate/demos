@@ -18,7 +18,7 @@ void ofApp::setup(){
 	farThreshold = 165;
 
 	lineSmoothing = 4;
-	handScaleUp = 1.2;
+	handScaleUp = 1.1;
 
 	ofBuffer buffer;
 	riverRegions.resize(5);
@@ -58,6 +58,8 @@ void ofApp::setup(){
 	riverNames[2] = "Riviere\nOuest";
 	riverNames[3] = "Riviere\nCalumet";
 	riverNames[4] = "Riviere\nRouge";
+
+	myfont.loadFont("FrutigerLTStd-Roman.ttf", 12);
 
 }
 
@@ -171,7 +173,8 @@ void ofApp::drawHandOverlay(){
 		if(contourFinder.handFound[i]) {
 
 			ofPolyline hand = contourFinder.hands[i].getSmoothed(lineSmoothing);
-			ofPoint centroid = hand.getCentroid2D();
+			ofPoint center = contourFinder.oldCentroids[i];
+			ofPoint tip = contourFinder.oldTips[i];
 
 			ofPushMatrix();
 			ofPushStyle();
@@ -188,7 +191,7 @@ void ofApp::drawHandOverlay(){
 				// ofCircle(contourFinder.wrists[i][0], 3);
 				// ofCircle(contourFinder.wrists[i][1], 3);
 
-				ofTranslate(centroid.x*(1-handScaleUp), centroid.y * (1 - handScaleUp ));
+				ofTranslate(center.x*(1-handScaleUp), center.y * (1 - handScaleUp ));
 				ofScale(handScaleUp, handScaleUp);
 
 				ofBeginShape();
@@ -208,24 +211,24 @@ void ofApp::drawHandOverlay(){
 				string palmText;
 				for (int i = 0; i < riverRegions.size(); ++i)
 				{
-					if( riverRegions[i].inside(centroid) ) {
+					if( riverRegions[i].inside(center) ) {
 						palmText = riverNames[i];
 					}
 				}
 				palmText = ofToString(palmText);
-				ofTranslate(centroid.x, centroid.y);
+				ofTranslate(center.x, center.y);
 
-				float hypotenuse = sqrt( pow(centroid.x - contourFinder.tips[i].x, 2) + pow(centroid.y - contourFinder.tips[i].y, 2) );
-				float angle =  ofRadToDeg( asin( (contourFinder.tips[i].y - centroid.y) / hypotenuse ));
-				if(contourFinder.tips[i].x < centroid.x ) angle *= -1;
+				float hypotenuse = sqrt( pow(center.x - tip.x, 2) + pow(center.y - tip.y, 2) );
+				float angle =  ofRadToDeg( asin( (tip.y - center.y) / hypotenuse ));
+				if(tip.x < center.x ) angle *= -1;
 				ofRotateZ(angle);
 				ofPoint exit = contourFinder.ends[i][0];
 				if (exit.x <= 5) ofRotateZ(180);
 				else if (exit.y <= 5) ofRotateZ(180);
 				else if (exit.x >= 625) ofRotateZ(0);
 
-				ofSetDrawBitmapMode(OF_BITMAPMODE_MODEL);
-				ofDrawBitmapString(palmText, -10, -10);
+				// ofSetDrawBitmapMode(OF_BITMAPMODE_MODEL);
+				myfont.drawString(palmText, -10, -10);
 
 			ofPopStyle();
 			ofPopMatrix();

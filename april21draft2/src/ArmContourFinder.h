@@ -33,6 +33,9 @@ public:
 	int MAX_MOVEMENT_DISTANCE;
 	int SURVIVAL_FRAMES;
 
+	vector< ofPoint > oldCentroids;
+	vector< ofPoint > oldTips;
+
 
 private:
 

@@ -28,6 +28,8 @@ void ArmContourFinder::update() {
 	tips.resize(size);
 	hands.resize(size);
 	handFound.resize(size, false);
+	oldCentroids.resize(size);
+	oldTips.resize(size);
 
 
 	// First put the info with the right blob (HACK, this whole experiment should probably be a linked list)
@@ -37,6 +39,8 @@ void ArmContourFinder::update() {
 	vector< vector< ofPoint > > oldWrists = wrists;
 	vector< bool > oldHandFound = handFound;
 	vector< ofPolyline > oldHands = hands;
+	vector< ofPoint > oldOldCentroids = oldCentroids;
+	vector< ofPoint > oldOldTips = oldTips;  // Worst piece of code ever?
 
 	for (int i = 0; i < size; ++i)
 	{
@@ -46,8 +50,11 @@ void ArmContourFinder::update() {
 				ends[i] = oldEnds[j];
 				tips[i] = oldTips[j];
 				wrists[i] = oldWrists[j];
-				handFound[i] = handFound[j];
-				hands[i] = hands[j];
+				handFound[i] = oldHandFound[j];
+				hands[i] = oldHands[j];
+				oldCentroids[i] = oldOldCentroids[j];
+				oldTips[i] = oldOldTips[j];
+
 			}
 		}
 	}
@@ -89,7 +96,7 @@ void ArmContourFinder::updateArm(int n) {
 	ofPoint newKeypoints [] = {newEnds[0], newEnds[1], newTip, newWrists[0], newWrists[1]};
 
 	//if within a minimum dist, don't move at all
-	int noiseDist = 100;
+	int noiseDist = 0;
 	float changed = false;
 
 	for (int i = 0; i < 5; ++i)
@@ -115,6 +122,7 @@ void ArmContourFinder::addHand(int n) {
 	polylines[n].getClosestPoint(wrists[n][1], &start);
 	polylines[n].getClosestPoint(wrists[n][0], &end);
 
+
 	int i = start;
 	while( i != end ) {
 		hands[n].addVertex( polylines[n][i] );
@@ -125,6 +133,12 @@ void ArmContourFinder::addHand(int n) {
 	// So that it closes up;
 	hands[n].setClosed(true);
 
+	int noiseDist = 100;
+	ofPoint centroid = hands[n].getCentroid2D();
+	if( ofDistSquared(centroid.x, centroid.y, oldCentroids[n].x, oldCentroids[n].y) > noiseDist )
+		oldCentroids[n] = centroid;
+	if( ofDistSquared(tips[n].x, tips[n].y, oldTips[n].x, oldTips[n].y) > noiseDist )
+		oldTips[n] = tips[n];
 
 
 }

@@ -58,6 +58,7 @@ class ofApp : public ofBaseApp{
 		ofPolyline			waterRegion;
 		vector< ofPolyline>	riverRegions;
 		const char * 		riverNames[5];
+		ofTrueTypeFont		myfont;
 
 		// Calibration
 		float x, y, w, h, r;

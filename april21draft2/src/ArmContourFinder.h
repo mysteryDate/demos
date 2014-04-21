@@ -36,10 +36,10 @@ public:
 	vector< ofPoint > oldCentroids;
 	vector< ofPoint > oldTips;
 
+	vector< int > bounds;
 
 private:
 
-	vector< int > bounds;
 
 
 	vector< ofPoint > 	findEnds(int n);

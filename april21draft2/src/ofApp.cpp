@@ -180,16 +180,16 @@ void ofApp::drawHandOverlay(){
 			ofPushStyle();
 				ofSetColor(255,255,255);
 
-				// ofCircle(contourFinder.ends[i][0], 3);
-				// ofCircle(contourFinder.ends[i][1], 3);
-				// ofCircle(contourFinder.tips[i], 3);
-				// ofNoFill();
-				// ofCircle(contourFinder.tips[i], contourFinder.MAX_HAND_SIZE);
-				// ofCircle(contourFinder.tips[i], contourFinder.MIN_HAND_SIZE);
-				// ofCircle(contourFinder.wrists[i][0], contourFinder.MAX_WRIST_WIDTH);
-				// ofFill();
-				// ofCircle(contourFinder.wrists[i][0], 3);
-				// ofCircle(contourFinder.wrists[i][1], 3);
+				ofCircle(contourFinder.ends[i][0], 3);
+				ofCircle(contourFinder.ends[i][1], 3);
+				ofCircle(contourFinder.tips[i], 3);
+				ofNoFill();
+				ofCircle(contourFinder.tips[i], contourFinder.MAX_HAND_SIZE);
+				ofCircle(contourFinder.tips[i], contourFinder.MIN_HAND_SIZE);
+				ofCircle(contourFinder.wrists[i][0], contourFinder.MAX_WRIST_WIDTH);
+				ofFill();
+				ofCircle(contourFinder.wrists[i][0], 3);
+				ofCircle(contourFinder.wrists[i][1], 3);
 
 				ofTranslate(center.x*(1-handScaleUp), center.y * (1 - handScaleUp ));
 				ofScale(handScaleUp, handScaleUp);
@@ -220,14 +220,13 @@ void ofApp::drawHandOverlay(){
 
 				float hypotenuse = sqrt( pow(center.x - tip.x, 2) + pow(center.y - tip.y, 2) );
 				float angle =  ofRadToDeg( asin( (tip.y - center.y) / hypotenuse ));
-				if(tip.x < center.x ) angle *= -1;
-				ofRotateZ(angle);
+				if(tip.x < center.x) angle *= -1;
 				ofPoint exit = contourFinder.ends[i][0];
-				if (exit.x <= 5) ofRotateZ(180);
-				else if (exit.y <= 5) ofRotateZ(180);
-				else if (exit.x >= 625) ofRotateZ(0);
+				if (exit.y <= contourFinder.bounds[1] + 5) angle += 180;
+				if ( (exit.x <= contourFinder.bounds[0] + 5 or exit.x >= contourFinder.bounds[2] - 5 ) and tip.y < center.y ) 
+					angle += 180;
+				ofRotateZ(angle);
 
-				// ofSetDrawBitmapMode(OF_BITMAPMODE_MODEL);
 				myfont.drawString(palmText, -10, -10);
 
 			ofPopStyle();

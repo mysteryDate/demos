@@ -133,7 +133,7 @@ void ArmContourFinder::addHand(int n) {
 	// So that it closes up;
 	hands[n].setClosed(true);
 
-	int noiseDist = 100;
+	int noiseDist = 200;
 	ofPoint centroid = hands[n].getCentroid2D();
 	if( ofDistSquared(centroid.x, centroid.y, oldCentroids[n].x, oldCentroids[n].y) > noiseDist )
 		oldCentroids[n] = centroid;

@@ -180,16 +180,16 @@ void ofApp::drawHandOverlay(){
 			ofPushStyle();
 				ofSetColor(255,255,255);
 
-				ofCircle(contourFinder.ends[i][0], 3);
-				ofCircle(contourFinder.ends[i][1], 3);
-				ofCircle(contourFinder.tips[i], 3);
-				ofNoFill();
-				ofCircle(contourFinder.tips[i], contourFinder.MAX_HAND_SIZE);
-				ofCircle(contourFinder.tips[i], contourFinder.MIN_HAND_SIZE);
-				ofCircle(contourFinder.wrists[i][0], contourFinder.MAX_WRIST_WIDTH);
-				ofFill();
-				ofCircle(contourFinder.wrists[i][0], 3);
-				ofCircle(contourFinder.wrists[i][1], 3);
+				// ofCircle(contourFinder.ends[i][0], 3);
+				// ofCircle(contourFinder.ends[i][1], 3);
+				// ofCircle(contourFinder.tips[i], 3);
+				// ofNoFill();
+				// ofCircle(contourFinder.tips[i], contourFinder.MAX_HAND_SIZE);
+				// ofCircle(contourFinder.tips[i], contourFinder.MIN_HAND_SIZE);
+				// ofCircle(contourFinder.wrists[i][0], contourFinder.MAX_WRIST_WIDTH);
+				// ofFill();
+				// ofCircle(contourFinder.wrists[i][0], 3);
+				// ofCircle(contourFinder.wrists[i][1], 3);
 
 				ofTranslate(center.x*(1-handScaleUp), center.y * (1 - handScaleUp ));
 				ofScale(handScaleUp, handScaleUp);
@@ -227,7 +227,10 @@ void ofApp::drawHandOverlay(){
 					angle += 180;
 				ofRotateZ(angle);
 
-				myfont.drawString(palmText, -10, -10);
+				ofPoint textCenter = myfont.getStringBoundingBox(palmText, 0, 0).getCenter();
+				ofTranslate(-textCenter.x, -textCenter.y);
+
+				myfont.drawString(palmText, 0, 0);
 
 			ofPopStyle();
 			ofPopMatrix();

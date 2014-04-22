@@ -15,6 +15,7 @@ void ofApp::setup(){
 	video.loadMovie("Map_Argenteuil_v5.mov");
 	video.play();
 
+
 	nearThreshold = 250;
 	farThreshold = 165;
 
@@ -64,6 +65,7 @@ void ofApp::setup(){
 
 	ripples.allocate(1920, 1080);
 	bounce.allocate(1920, 1080);
+	riverMask.loadImage("riviere_masque_alpha.png");
 	
 
 }
@@ -89,23 +91,28 @@ void ofApp::update(){
 		// Water ripples
 		ripples.begin();
 			ofPushStyle();
-			ofFill();
-			ofSetColor(255,255,255);
-			// ofSetColor(ofNoise( ofGetFrameNum() ) * 255 * 5, 255);
-			ofEllipse(mouseX, mouseY, 10, 10);
-			for (int i = 0; i < contourFinder.size(); ++i)
-			{
-				contourFinder.getPolyline(i).draw();
-			}
-			ofSetColor(0,0,0);
-			for (int i = 0; i < riverRegions.size(); ++i)
-			{	
-				riverRegions[i].draw();
-			}
+			ofPushMatrix();
+				ofRotateZ(-VIDEO_R);
+				ofTranslate(-VIDEO_X, -VIDEO_Y);
+				ofScale(1920/VIDEO_W, 1080/VIDEO_H);
+				ofFill();
+				ofSetColor(255,255,255);
+				// ofSetColor(ofNoise( ofGetFrameNum() ) * 255 * 5, 255);
+				ofEllipse(mouseX, mouseY, 10, 10);
+				for (int i = 0; i < contourFinder.size(); ++i)
+				{
+					ofBeginShape();
+					for (int j = 0; j < contourFinder.getPolyline(i).size(); ++j)
+					{
+						ofVertex(contourFinder.getPolyline(i)[j]);
+					}
+					ofEndShape();
+				}
+				riverMask.draw(0,0);
 			ofPopStyle();
+			ofPopMatrix();
 		ripples.end();
 		ripples.update();
-
 		bounce << ripples;
 
 	}

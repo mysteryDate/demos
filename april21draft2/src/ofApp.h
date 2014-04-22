@@ -65,6 +65,7 @@ class ofApp : public ofBaseApp{
 		// For water effect
 		ofxRipples	ripples;
 		ofxBounce 	bounce;
+		ofImage 	riverMask;
 
 		// Calibration
 		float x, y, w, h, r;

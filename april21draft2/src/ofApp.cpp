@@ -12,7 +12,7 @@ void ofApp::setup(){
 	kinectImg.allocate(kinect.width, kinect.height);
 	processedImg.allocate(kinect.width*INPUT_DATA_ZOOM, kinect.height*INPUT_DATA_ZOOM);
 
-	video.loadMovie("MapBasicV2.mov");
+	video.loadMovie("Map_Argenteuil_v5.mov");
 	video.play();
 
 	nearThreshold = 250;
@@ -198,6 +198,15 @@ void ofApp::drawHandOverlay(){
 	{
 		ofRectangle bounds = ofxCv::toOf(contourFinder.getBoundingRect(i));
 
+		ofPushStyle();
+		ofSetColor(0,0,0);
+		ofBeginShape();
+			for (int j = 0; j < contourFinder.getPolyline(i).size(); ++j)
+			{
+				ofVertex(contourFinder.getPolyline(i)[j]);
+			}
+		ofEndShape();
+
 		if(contourFinder.handFound[i]) {
 
 			ofPolyline hand = contourFinder.hands[i].getSmoothed(lineSmoothing);
@@ -205,8 +214,6 @@ void ofApp::drawHandOverlay(){
 			ofPoint tip = contourFinder.oldTips[i];
 
 			ofPushMatrix();
-			ofPushStyle();
-				ofSetColor(0,0,0);
 
 				// ofCircle(contourFinder.ends[i][0], 3);
 				// ofCircle(contourFinder.ends[i][1], 3);
@@ -218,12 +225,6 @@ void ofApp::drawHandOverlay(){
 				// ofFill();
 				// ofCircle(contourFinder.wrists[i][0], 3);
 				// ofCircle(contourFinder.wrists[i][1], 3);
-				ofBeginShape();
-					for (int j = 0; j < contourFinder.getPolyline(i).size(); ++j)
-					{
-						ofVertex(contourFinder.getPolyline(i)[j]);
-					}
-				ofEndShape();
 
 				ofTranslate(center.x*(1-handScaleUp), center.y * (1 - handScaleUp ));
 				ofScale(handScaleUp, handScaleUp);

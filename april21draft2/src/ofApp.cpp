@@ -5,13 +5,14 @@
 void ofApp::setup(){
 
 	ofBackground(0,0,0);
+	ofEnableAlphaBlending();
 
 	kinect.init();
 	kinect.open();
 	kinectImg.allocate(kinect.width, kinect.height);
 	processedImg.allocate(kinect.width*INPUT_DATA_ZOOM, kinect.height*INPUT_DATA_ZOOM);
 
-	video.loadMovie("MapBasicV1.mov");
+	video.loadMovie("MapBasicV2.mov");
 	video.play();
 
 	nearThreshold = 250;
@@ -61,6 +62,10 @@ void ofApp::setup(){
 
 	myfont.loadFont("FrutigerLTStd-Roman.ttf", 12);
 
+	ripples.allocate(1920, 1080);
+	bounce.allocate(1920, 1080);
+	
+
 }
 
 //--------------------------------------------------------------
@@ -71,7 +76,7 @@ void ofApp::update(){
 	video.update();
 
 	videoImg.setFromPixels(video.getPixels(), video.width, video.height, OF_IMAGE_COLOR);
-
+	bounce.setTexture(videoImg.getTextureReference(), 1);
 
 	if(kinect.isFrameNew()) {
 
@@ -80,6 +85,28 @@ void ofApp::update(){
 
 		contourFinder.findContours(processedImg);
 		contourFinder.update();
+
+		// Water ripples
+		ripples.begin();
+			ofPushStyle();
+			ofFill();
+			ofSetColor(255,255,255);
+			// ofSetColor(ofNoise( ofGetFrameNum() ) * 255 * 5, 255);
+			ofEllipse(mouseX, mouseY, 10, 10);
+			for (int i = 0; i < contourFinder.size(); ++i)
+			{
+				contourFinder.getPolyline(i).draw();
+			}
+			ofSetColor(0,0,0);
+			for (int i = 0; i < riverRegions.size(); ++i)
+			{	
+				riverRegions[i].draw();
+			}
+			ofPopStyle();
+		ripples.end();
+		ripples.update();
+
+		bounce << ripples;
 
 	}
 
@@ -125,6 +152,7 @@ void ofApp::draw(){
 	ofPushMatrix();
 		ofRotateZ(VIDEO_R);
 		videoImg.draw(VIDEO_X, VIDEO_Y, VIDEO_W, VIDEO_H);
+		// bounce.draw(VIDEO_X, VIDEO_Y);
 	ofPopMatrix();
 
 	drawHandOverlay();
@@ -178,7 +206,7 @@ void ofApp::drawHandOverlay(){
 
 			ofPushMatrix();
 			ofPushStyle();
-				ofSetColor(255,255,255);
+				ofSetColor(0,0,0);
 
 				// ofCircle(contourFinder.ends[i][0], 3);
 				// ofCircle(contourFinder.ends[i][1], 3);
@@ -190,14 +218,20 @@ void ofApp::drawHandOverlay(){
 				// ofFill();
 				// ofCircle(contourFinder.wrists[i][0], 3);
 				// ofCircle(contourFinder.wrists[i][1], 3);
+				ofBeginShape();
+					for (int j = 0; j < contourFinder.getPolyline(i).size(); ++j)
+					{
+						ofVertex(contourFinder.getPolyline(i)[j]);
+					}
+				ofEndShape();
 
 				ofTranslate(center.x*(1-handScaleUp), center.y * (1 - handScaleUp ));
 				ofScale(handScaleUp, handScaleUp);
 
 				ofBeginShape();
-					for (int i = 0; i < hand.size(); ++i)
+					for (int j = 0; j < hand.size(); ++j)
 					{
-						ofVertex(hand[i].x, hand[i].y);
+						ofVertex(hand[j].x, hand[j].y);
 					}
 				ofEndShape();
 
@@ -209,10 +243,10 @@ void ofApp::drawHandOverlay(){
 				ofSetColor(0,0,0);
 
 				string palmText;
-				for (int i = 0; i < riverRegions.size(); ++i)
+				for (int j = 0; j < riverRegions.size(); ++j)
 				{
-					if( riverRegions[i].inside(center) ) {
-						palmText = riverNames[i];
+					if( riverRegions[j].inside(center) ) {
+						palmText = riverNames[j];
 					}
 				}
 				palmText = ofToString(palmText);
@@ -230,6 +264,7 @@ void ofApp::drawHandOverlay(){
 				ofPoint textCenter = myfont.getStringBoundingBox(palmText, 0, 0).getCenter();
 				ofTranslate(-textCenter.x, -textCenter.y);
 
+				ofSetColor(255,255,255);
 				myfont.drawString(palmText, 0, 0);
 
 			ofPopStyle();

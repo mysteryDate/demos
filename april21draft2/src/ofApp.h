@@ -21,6 +21,8 @@
 #include "ofxCv.h"
 #include "ofxKinect.h"
 #include "ArmContourFinder.h"
+#include "ofxRipples.h"
+#include "ofxBounce.h"
 #include <cmath>
 
 class ofApp : public ofBaseApp{
@@ -59,6 +61,10 @@ class ofApp : public ofBaseApp{
 		vector< ofPolyline>	riverRegions;
 		const char * 		riverNames[5];
 		ofTrueTypeFont		myfont;
+
+		// For water effect
+		ofxRipples	ripples;
+		ofxBounce 	bounce;
 
 		// Calibration
 		float x, y, w, h, r;

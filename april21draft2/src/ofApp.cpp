@@ -60,7 +60,7 @@ void ofApp::setup(){
 	riverNames[3] = "Riviere\nCalumet";
 	riverNames[4] = "Riviere\nRouge";
 
-	myfont.loadFont("FrutigerLTStd-Roman.ttf", 12);
+	myfont.loadFont("AltoPro-Normal.ttf", 12);
 
 	ripples.allocate(1920, 1080);
 	bounce.allocate(1920, 1080);
@@ -132,9 +132,7 @@ void ofApp::transformInput()
 			int j = (y - KINECT_CROP_TOP )* processedImg.getWidth() + (x - KINECT_CROP_LEFT);
 			if(inPix[i] < nearThreshold && inPix[i] > farThreshold) {
 				outPix[j] = 255;
-			} else {
-				outPix[j] = 0;
-			}
+			} 
 			j++;
 		}
 	}
@@ -151,8 +149,8 @@ void ofApp::draw(){
 
 	ofPushMatrix();
 		ofRotateZ(VIDEO_R);
-		videoImg.draw(VIDEO_X, VIDEO_Y, VIDEO_W, VIDEO_H);
-		// bounce.draw(VIDEO_X, VIDEO_Y);
+		// videoImg.draw(VIDEO_X, VIDEO_Y, VIDEO_W, VIDEO_H);
+		bounce.draw(VIDEO_X, VIDEO_Y, VIDEO_W, VIDEO_H);
 	ofPopMatrix();
 
 	drawHandOverlay();
@@ -207,6 +205,27 @@ void ofApp::drawHandOverlay(){
 			}
 		ofEndShape();
 
+		// ofPushStyle();
+		// 	ofSetColor(255,255,255);
+		// 	if(contourFinder.ends[i].size() == 2) {
+		// 		ofFill();
+		// 		ofCircle(contourFinder.ends[i][0], 3);
+		// 		ofCircle(contourFinder.ends[i][1], 3);
+		// 	}
+		// 	if(true) {
+		// 		ofCircle(contourFinder.tips[i], 3);
+		// 		ofNoFill();
+		// 		ofCircle(contourFinder.tips[i], contourFinder.MAX_HAND_SIZE);
+		// 		ofCircle(contourFinder.tips[i], contourFinder.MIN_HAND_SIZE);
+		// 	}
+		// 	if(contourFinder.wrists[i].size() == 2) {
+		// 		ofCircle(contourFinder.wrists[i][0], contourFinder.MAX_WRIST_WIDTH);
+		// 		ofFill();
+		// 		ofCircle(contourFinder.wrists[i][0], 3);
+		// 		ofCircle(contourFinder.wrists[i][1], 3);
+		// 	}
+		// ofPopStyle();
+
 		if(contourFinder.handFound[i]) {
 
 			ofPolyline hand = contourFinder.hands[i].getSmoothed(lineSmoothing);
@@ -215,20 +234,10 @@ void ofApp::drawHandOverlay(){
 
 			ofPushMatrix();
 
-				// ofCircle(contourFinder.ends[i][0], 3);
-				// ofCircle(contourFinder.ends[i][1], 3);
-				// ofCircle(contourFinder.tips[i], 3);
-				// ofNoFill();
-				// ofCircle(contourFinder.tips[i], contourFinder.MAX_HAND_SIZE);
-				// ofCircle(contourFinder.tips[i], contourFinder.MIN_HAND_SIZE);
-				// ofCircle(contourFinder.wrists[i][0], contourFinder.MAX_WRIST_WIDTH);
-				// ofFill();
-				// ofCircle(contourFinder.wrists[i][0], 3);
-				// ofCircle(contourFinder.wrists[i][1], 3);
-
 				ofTranslate(center.x*(1-handScaleUp), center.y * (1 - handScaleUp ));
 				ofScale(handScaleUp, handScaleUp);
 
+				ofSetColor(0,0,0);
 				ofBeginShape();
 					for (int j = 0; j < hand.size(); ++j)
 					{

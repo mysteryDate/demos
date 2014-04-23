@@ -140,6 +140,9 @@ void ofApp::transformInput()
 			if(inPix[i] < nearThreshold && inPix[i] > farThreshold) {
 				outPix[j] = 255;
 			} 
+			else {
+				outPix[j] = 0;
+			}
 			j++;
 		}
 	}
@@ -176,8 +179,8 @@ void ofApp::draw(){
 		// << "farThreshold: " << farThreshold << endl
 		<< "MAX_HAND_SIZE: " << contourFinder.MAX_HAND_SIZE << endl
 		<< "MIN_HAND_SIZE: " << contourFinder.MIN_HAND_SIZE << endl
-		<< "MAX_WRIST_WIDTH: " << contourFinder.MAX_WRIST_WIDTH 
-		<< endl;
+		<< "MAX_WRIST_WIDTH: " << contourFinder.MAX_WRIST_WIDTH << endl
+		<< "framerate: " << ofToString(ofGetFrameRate()) << endl;
 		if(contourFinder.size() > 0) {
 			ofRectangle rect = ofxCv::toOf(contourFinder.getBoundingRect(0));
 			reportStream

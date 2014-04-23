@@ -13,7 +13,7 @@ public:
 	vector< bool > handFound;
 
 	void update();
-	ofPoint getHandCentroid(int n);
+	ofPolyline getHand(int n);
 	
 	int MIN_HAND_SIZE;
 	int MAX_HAND_SIZE;
@@ -29,7 +29,6 @@ private:
 	ofPoint				findTip(int n);
 	vector< ofPoint > 	findWrists(int n);
 
-	void updateArm(int n);
 	void addHand(int n);
 
 };

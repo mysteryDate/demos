@@ -51,13 +51,15 @@ class ofApp : public ofBaseApp{
 		void keyPressed(int key);
 		void mousePressed(int x, int y, int button);
 
+		// Test input
+
 
 		// Input Processing
 		ofxKinect 			kinect;
 		ofVideoPlayer 		video;		
-		ofImage				videoImg;
+		cv::Mat 			input;
+		cv::Mat 			croppedInput;
 		ofxCvGrayscaleImage	kinectImg;
-		ofxCvGrayscaleImage processedImg;
 		int 				nearThreshold;
 		int 				farThreshold;
 
@@ -65,8 +67,11 @@ class ofApp : public ofBaseApp{
         ArmContourFinder	contourFinder;
         struct Hand
         {
+        	ofPolyline line;
         	ofPoint centroid;
         	ofPoint tip;
+        	vector< ofPoint > ends;
+        	vector< ofPoint > wrists;
         	unsigned int label;
         };
         vector< Hand >		hands;

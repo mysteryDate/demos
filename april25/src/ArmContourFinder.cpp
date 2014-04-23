@@ -3,16 +3,16 @@
 ArmContourFinder::ArmContourFinder() {
 
 	// Find from the bounding boxes
-	bounds.push_back(39);
 	bounds.push_back(1);
-	bounds.push_back(1514);
-	bounds.push_back(1038);
+	bounds.push_back(1);
+	bounds.push_back(601);
+	bounds.push_back(438);
 
 	setMinArea(50);
 
-	MIN_HAND_SIZE = 129;
-	MAX_HAND_SIZE = 208;
-	MAX_WRIST_WIDTH = 79;
+	MIN_HAND_SIZE = 56;
+	MAX_HAND_SIZE = 99;
+	MAX_WRIST_WIDTH = 33;
 
 }
 
@@ -32,16 +32,7 @@ void ArmContourFinder::update() {
 	}
 }
 
-ofPoint ArmContourFinder::getHandCentroid(int n) {
-
-	// unsigned int n;
-	// for (int i = 0; i < polylines.size(); ++i)
-	// {
-	// 	if(getLabel(i) == label) {
-	// 		n = i;
-	// 		break;
-	// 	}
-	// }
+ofPolyline ArmContourFinder::getHand(int n) {
 
 	if(!handFound[n]) return;
 
@@ -62,7 +53,7 @@ ofPoint ArmContourFinder::getHandCentroid(int n) {
 	// So that it closes up;
 	hand.setClosed(true);
 
-	return hand.getCentroid2D();
+	return hand;
 
 }
 
@@ -101,7 +92,7 @@ vector< ofPoint > ArmContourFinder::findEnds(int n) {
 
 	for (int i = 0; i < pts.size(); ++i)
 	{
-		if(pts[i].x <= bounds[0] + 5 || pts[i].y <= bounds[1] + 5
+		if(pts[i].x <= bounds[0] + 0 || pts[i].y <= bounds[1] + 0
  			|| pts[i].x >= bounds[2] - 5 || pts[i].y >=  bounds[3] - 5) {
 			endPoints.push_back(pts[i]);
 		}

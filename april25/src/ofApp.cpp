@@ -11,13 +11,13 @@ void ofApp::setup(){
 	kinect.init();
 	kinect.open();
 	kinectImg.allocate(kinect.width, kinect.height);
-	kinectImg.setROI(KINECT_CROP_LEFT, KINECT_CROP_RIGHT, 
-		kinect.width - KINECT_CROP_LEFT - KINECT_CROP_RIGHT,
-		kinect.height - KINECT_CROP_TOP - KINECT_CROP_BOTTOM);
+	// kinectImg.setROI(KINECT_CROP_LEFT, KINECT_CROP_RIGHT, 
+	// 	kinect.width - KINECT_CROP_LEFT - KINECT_CROP_RIGHT,
+	// 	kinect.height - KINECT_CROP_TOP - KINECT_CROP_BOTTOM);
 	// processedImg.allocate(kinect.width*INPUT_DATA_ZOOM, kinect.height*INPUT_DATA_ZOOM);
 
 	nearThreshold = 250;
-	farThreshold = 165;
+	farThreshold = 170;
 
 	//video instructions
 	video.loadMovie("Map_Argenteuil_v5.mov");
@@ -86,15 +86,20 @@ void ofApp::update(){
 	kinect.update();
 	video.update();
 
-	videoImg.setFromPixels(video.getPixels(), video.width, video.height, OF_IMAGE_COLOR);
-	bounce.setTexture(videoImg.getTextureReference(), 1);
+	bounce.setTexture(video.getTextureReference(), 1);
 
 	if(kinect.isFrameNew()) {
 
 		kinectImg.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height);
 		transformInput();
 
-		contourFinder.findContours(kinectImg);
+		input = ofxCv::toCv(kinectImg);
+		cv::Rect crop_roi = cv::Rect(KINECT_CROP_LEFT, KINECT_CROP_TOP, 
+			kinect.width - KINECT_CROP_LEFT - KINECT_CROP_RIGHT,
+			kinect.height - KINECT_CROP_TOP - KINECT_CROP_BOTTOM);
+		croppedInput = input(crop_roi).clone();
+
+		contourFinder.findContours(croppedInput);
 		contourFinder.update();
 
 		updateHands();
@@ -130,12 +135,9 @@ void ofApp::updateRipples(){
 	ripples.begin();
 		ofPushStyle();
 		ofPushMatrix();
-			// ofRotateZ(-VIDEO_R);
-			// ofTranslate(-VIDEO_X, -VIDEO_Y);
-			// ofScale(1920/VIDEO_W, 1080/VIDEO_H);
 			ofFill();
 			ofSetColor(255,255,255);
-			// ofSetColor(ofNoise( ofGetFrameNum() ) * 255 * 5, 255);
+
 			ofEllipse(mouseX, mouseY, 10, 10);
 			for (int i = 0; i < contourFinder.size(); ++i)
 			{
@@ -159,16 +161,21 @@ void ofApp::updateRipples(){
 void ofApp::updateHands(){
 
 	vector < Hand > newHands;
-	newHands.resize(contourFinder.size());
-	// Newhand -> oldhand associtaion
-	map < int, int > associtaion;
+
+	// Newhand -> oldhand association
+	map < int, int > association;
 
 	for (int i = 0; i < contourFinder.size(); ++i)
 	{
 		if(contourFinder.handFound[i]) {
-			newHands[i].tip = contourFinder.tips[i];
-			newHands[i].centroid = contourFinder.getHandCentroid(i);
-			newHands[i].label = contourFinder.getLabel(i);
+			Hand blob;
+			blob.line = contourFinder.getHand(i);
+			blob.centroid = blob.line.getCentroid2D();
+			blob.tip = contourFinder.tips[i];
+			blob.wrists = contourFinder.wrists[i];
+			blob.ends = contourFinder.ends[i];
+			blob.label = contourFinder.getLabel(i);
+			newHands.push_back(blob);
 		}
 	}
 
@@ -180,7 +187,7 @@ void ofApp::updateHands(){
 		for (int j = 0; j < newHands.size(); ++j)
 		{
 			if(newHands[j].label == label) {
-				associtaion[j] = i;
+				association[j] = i;
 				found = true;
 				break;
 			}
@@ -199,33 +206,36 @@ void ofApp::updateHands(){
 		for (int j = 0; j < hands.size(); ++j)
 		{
 			if(hands[j].label == label) {
-				associtaion[i] = j;
+				association[i] = j;
 				found = true;
 				break;
 			}
 		}
 		if(!found) {
 			hands.push_back(newHands[i]);
+			association[i] = hands.size() - 1;
 		}
 	}
 
 	//Finally, the magic
-	int noiseDist = 100;
+	int noiseDist = 0;
 	for (int i = 0; i < newHands.size(); ++i)
 	{
-		int j = associtaion[i];
-		ofPoint oldCentroid = hands[j].centroid;
-		ofPoint newCentroid = newHands[i].centroid;
-		ofPoint oldTip 		= hands[j].tip;
-		ofPoint newTip 		= newHands[i].tip;
+		int j = association[i];
+		// ofPoint oldCentroid = hands[j].centroid;
+		// ofPoint newCentroid = newHands[i].centroid;
+		// ofPoint oldTip 		= hands[j].tip;
+		// ofPoint newTip 		= newHands[i].tip;
 
-		int centDist = ofDistSquared(oldCentroid.x, oldCentroid.y, newCentroid.x, newCentroid.y);
-		int tipDist = ofDistSquared(oldTip.x, oldTip.y, newTip.x, newTip.y);
+		// int centDist = ofDistSquared(oldCentroid.x, oldCentroid.y, newCentroid.x, newCentroid.y);
+		// int tipDist = ofDistSquared(oldTip.x, oldTip.y, newTip.x, newTip.y);
 
-		if(centDist > noiseDist or tipDist > noiseDist) {
-			hands[j].centroid 	= newCentroid;
-			hands[j].tip 		= newTip;
-		}
+		// if(centDist > noiseDist or tipDist > noiseDist) {
+		// 	hands[j].centroid 	= newCentroid;
+		// 	hands[j].tip 		= newTip;
+		// }
+
+		hands[j] = newHands[i];
 
 	}
 }
@@ -238,6 +248,12 @@ void ofApp::draw(){
 	contourFinder.draw();
 
 	drawHandOverlay();
+
+	ofSetColor(0,255,0);
+	for (int i = 0; i < riverRegions.size(); ++i)
+	{
+		riverRegions[i].draw();
+	}
 
 	drawFeedback();
 
@@ -260,16 +276,14 @@ void ofApp::drawHandOverlay(){
 		blob = blob.getSmoothed(lineSmoothing);
 		ofPoint center = blob.getCentroid2D();
 
-		ofPushMatrix();
-			ofTranslate(center.x*(1-armScaleUp), center.y * (1-armScaleUp));
-			ofScale(armScaleUp, armScaleUp);
-			ofBeginShape();
-				for (int j = 0; j < blob.size(); ++j) {
-					ofVertex(blob[j]);
-				}
-			ofEndShape();
-		ofPopMatrix();
+		ofBeginShape();
+			for (int j = 0; j < blob.size(); ++j) {
+				ofVertex(blob[j]);
+			}
+		ofEndShape();
 	}
+
+	ofPopMatrix();
 
 	// Drawing text onto hands
 	ofSetColor(255,255,255);
@@ -278,6 +292,33 @@ void ofApp::drawHandOverlay(){
 		string palmText;
 		ofPoint center 	= hands[i].centroid;
 		ofPoint tip 	= hands[i].tip;
+		center.x = center.x * INPUT_DATA_ZOOM + INPUT_DATA_DX;
+		center.y = center.y * INPUT_DATA_ZOOM + INPUT_DATA_DY;
+		tip.x = tip.x * INPUT_DATA_ZOOM + INPUT_DATA_DX;
+		tip.y = tip.y * INPUT_DATA_ZOOM + INPUT_DATA_DY;
+
+		ofPushStyle();
+			ofSetColor(255,255,255);
+			ofCircle(center, 3);
+			if(contourFinder.ends[i].size() == 2) {
+				ofFill();
+				ofCircle(contourFinder.ends[i][0], 3);
+				ofCircle(contourFinder.ends[i][1], 3);
+			}
+			if(true) {
+				ofCircle(contourFinder.tips[i], 3);
+				ofNoFill();
+				ofCircle(contourFinder.tips[i], contourFinder.MAX_HAND_SIZE);
+				ofCircle(contourFinder.tips[i], contourFinder.MIN_HAND_SIZE);
+			}
+			if(contourFinder.wrists[i].size() == 2) {
+				ofCircle(contourFinder.wrists[i][0], contourFinder.MAX_WRIST_WIDTH);
+				ofFill();
+				ofCircle(contourFinder.wrists[i][0], 3);
+				ofCircle(contourFinder.wrists[i][1], 3);
+			}
+		ofPopStyle();
+
 		for (int j = 0; j < riverRegions.size(); ++j)
 		{
 			if( riverRegions[j].inside(center) ) {
@@ -315,7 +356,26 @@ void ofApp::drawFeedback() {
 	ofSetColor(0,255,0);
 
 	stringstream reportStream;
-	reportStream << ofToString(ofGetFrameRate()) << endl;
+
+	if (contourFinder.size() != 0)
+	{
+		ofRectangle rect = ofxCv::toOf(contourFinder.getBoundingRect(0));
+		reportStream
+		<< "left: " << rect.getLeft() << endl
+		<< "right: " << rect.getRight() << endl
+		<< "top: " << rect.getTop() << endl
+		<< "bottom: " << rect.getBottom() << endl;
+	}
+
+	reportStream 
+	<< "nearThreshold: " << nearThreshold << endl
+	<< "farThreshold: " << farThreshold << endl
+	<< "MAX_HAND_SIZE: " << contourFinder.MAX_HAND_SIZE << endl
+	<< "MIN_HAND_SIZE: " << contourFinder.MIN_HAND_SIZE << endl
+	<< "MAX_WRIST_WIDTH: " << contourFinder.MAX_WRIST_WIDTH << endl
+	<< "hands found: " << hands.size() << endl
+	<< "contourFinder.size(): " << contourFinder.size() << endl
+	<< ofToString(ofGetFrameRate()) << endl;
 
 	ofDrawBitmapString(reportStream.str(), 20, 652);
 	ofPopStyle();
@@ -332,6 +392,53 @@ void ofApp::exit(){
 void ofApp::keyPressed(int key){
 
 	switch(key) {
+
+		case '>':
+		case '.':
+			farThreshold ++;
+			if (farThreshold > 255) farThreshold = 255;
+			break;
+			
+		case '<':
+		case ',':
+			farThreshold --;
+			if (farThreshold < 0) farThreshold = 0;
+			break;
+			
+		case '+':
+		case '=':
+			nearThreshold ++;
+			if (nearThreshold > 255) nearThreshold = 255;
+			break;
+			
+		case '-':
+			nearThreshold --;
+			if (nearThreshold < 0) nearThreshold = 0;
+			break;
+
+		case 'H':
+			contourFinder.MAX_HAND_SIZE++;
+			break;
+
+		case 'h':
+			contourFinder.MAX_HAND_SIZE--;
+			break;
+
+		case 'G':
+			contourFinder.MIN_HAND_SIZE++;
+			break;
+
+		case 'g':
+			contourFinder.MIN_HAND_SIZE--;
+			break;
+
+		case 'S':
+			contourFinder.MAX_WRIST_WIDTH++;
+			break;
+
+		case 's':
+			contourFinder.MAX_WRIST_WIDTH--;
+			break;
 
 	}
 

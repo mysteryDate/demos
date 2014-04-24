@@ -86,7 +86,19 @@ bool ArmContourFinder::findHand(int n) {
 
 vector< ofPoint > ArmContourFinder::findEnds(int n) {
 
-	//First, find ends
+	// if ends are still good, use em
+	if(ends[n].size() == 2) {
+		vector < ofPoint > closestEnds;
+		closestEnds.push_back(polylines[n].getClosestPoint(ends[n][0]));
+		closestEnds.push_back(polylines[n].getClosestPoint(ends[n][1]));
+		if( (closestEnds[0].x <= bounds[0] + 0 || closestEnds[0].y <= bounds[1] + 0
+ 			|| closestEnds[0].x >= bounds[2] - 2 || closestEnds[0].y >=  bounds[3] - 2) and 
+			(closestEnds[0].x <= bounds[0] + 0 || closestEnds[0].y <= bounds[1] + 0
+ 			|| closestEnds[0].x >= bounds[2] - 2 || closestEnds[0].y >=  bounds[3] - 2) )
+				//Biggest conditional statement ever? Seeing if the two are still on the edge
+				return closestEnds;
+	}
+
 	vector< ofPoint > pts = polylines[n].getVertices();
 	vector< ofPoint > endPoints;
 
@@ -128,7 +140,18 @@ ofPoint ArmContourFinder::findTip(int n) {
 	float xn = (yn - baseCenter.y) / m + baseCenter.x;
 	ofPoint mostDistant = ofPoint(xn, yn);
 
-	return polylines[n].getClosestPoint(mostDistant);
+	ofPoint newTip = polylines[n].getClosestPoint(mostDistant);
+
+	//If our old tip is still good, keep it
+	if(tips.size() > n) {
+		ofPoint closestTip = polylines[n].getClosestPoint(tips[n]);
+		float dist = ofDistSquared(closestTip.x, closestTip.y, tips[n].x, tips[n].y);
+		if(dist < 10) { //TODO change magic number
+			return closestTip;
+		}
+	}
+
+	return newTip;
 
 }
 

@@ -84,8 +84,9 @@ class ofApp : public ofBaseApp{
         vector< Hand >		hands;
 
 		// Display variables
-		int 				lineSmoothing;
-		float 				armScaleUp;
+		int 	lineSmoothing;
+		float 	armScaleUp;
+		float	smoothingRate;
 
 
 		// For defining regions

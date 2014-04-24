@@ -122,6 +122,12 @@ vector< ofPoint > ArmContourFinder::findEnds(int n) {
 		}
 		endPoints.resize(2);
 	}
+	if(endPoints.size() == 0) {
+		ofPoint centroid = polylines[n].getCentroid2D();
+		ofPoint mark = ofPoint(centroid.x, bounds[3]);
+		endPoints.push_back(polylines[n].getClosestPoint(mark));
+		endPoints.push_back(endPoints[0]);
+	}
 
 	return endPoints;
 
@@ -145,8 +151,8 @@ ofPoint ArmContourFinder::findTip(int n) {
 	//If our old tip is still good, keep it
 	if(tips.size() > n) {
 		ofPoint closestTip = polylines[n].getClosestPoint(tips[n]);
-		float dist = ofDistSquared(closestTip.x, closestTip.y, tips[n].x, tips[n].y);
-		if(dist < 4) { //TODO change magic number
+		float dist = ofDistSquared(closestTip.x, closestTip.y, newTip.x, newTip.y);
+		if(dist < 100) { //TODO change magic number
 			return closestTip;
 		}
 	}

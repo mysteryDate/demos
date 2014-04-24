@@ -14,7 +14,7 @@ void ofApp::setup(){
 	kinectImg.allocate(kinect.width, kinect.height);
 
 	nearThreshold = 207;
-	farThreshold = 170;
+	farThreshold = 164;
 
 	//video instructions
 	video.loadMovie("Map_Argenteuil_v5.mov");
@@ -25,6 +25,7 @@ void ofApp::setup(){
 	lineSmoothing = 4;
 	armScaleUp = 1.1;
 	myfont.loadFont("AltoPro-Normal.ttf", 12);
+	cout << "encoding: " << myfont.getEncoding() << endl;
 
 	//for water ripples
 	ofEnableAlphaBlending();
@@ -40,7 +41,7 @@ void ofApp::setup(){
 	contourFinder.bounds[3] = kinect.height - KINECT_CROP_TOP - KINECT_CROP_BOTTOM - 1;
 
 	noiseDist = 2;
-	video.setFrame(1300);
+	smoothingRate = 0.5;
 
 	x = VIDEO_X;
 	y = VIDEO_Y;
@@ -85,8 +86,8 @@ void ofApp::fillInRiverRegions() {
 		riverRegions[i].close();
 	}
 
-	riverNames[0] = "Rivi\xE8re des\nOutaouais";
-	riverNames[1] = "Rivière\ndu Nord";
+	riverNames[0] = "Riviere des\nOutaouais";
+	riverNames[1] = "Riviere\ndu Nord";
 	riverNames[2] = "Riviere\nOuest";
 	riverNames[3] = "Riviere\nCalumet";
 	riverNames[4] = "Riviere\nRouge";
@@ -265,21 +266,32 @@ void ofApp::updateHands(){
 	int ignoreDist = noiseDist * noiseDist;
 	for (int i = 0; i < hands.size(); ++i)
 	{
+		Hand handCopy = newHands[i];
+
+		ofPoint oldKeypoints[] = {hands[i].centroid, hands[i].ends[0], hands[i].ends[1], hands[i].tip, hands[i].wrists[0], hands[i].wrists[1]};
+		ofPoint * keypoints[] = {&handCopy.centroid, &handCopy.ends[0], &handCopy.ends[1], &handCopy.tip, &handCopy.wrists[0], &handCopy.wrists[1]};
+
+		for (int i = 0; i < 6; ++i)
+		{
+			float smoothedX = ofLerp(keypoints[i]->x, oldKeypoints[i].x, smoothingRate);
+			float smoothedY = ofLerp(keypoints[i]->y, oldKeypoints[i].y, smoothingRate);
+			*keypoints[i] = ofPoint(smoothedX, smoothedY);
+		}
+
 		ofPoint oldCentroid = hands[i].centroid;
-		ofPoint newCentroid = newHands[i].centroid;
+		ofPoint newCentroid = handCopy.centroid;
 		ofPoint oldTip 		= hands[i].tip;
-		ofPoint newTip 		= newHands[i].tip;
-		
-		hands[i] = newHands[i];
+		ofPoint newTip 		= handCopy.tip;
+
+		hands[i] = handCopy;
 
 		int centDist = ofDistSquared(oldCentroid.x, oldCentroid.y, newCentroid.x, newCentroid.y);
 		int tipDist = ofDistSquared(oldTip.x, oldTip.y, newTip.x, newTip.y);
 
-		if(centDist < ignoreDist and tipDist < ignoreDist) {
+		if(centDist < ignoreDist) 
 			hands[i].centroid 	= oldCentroid;
+		if(tipDist < ignoreDist)
 			hands[i].tip 		= oldTip;
-		}
-
 
 	}
 }
@@ -360,7 +372,7 @@ void ofApp::drawHandOverlay(){
 			float width = myfont.getStringBoundingBox(palmText, 0, 0).getWidth();
 			ofTranslate(-textCenter.x, -textCenter.y);
 			float size = ofDist(tip.x, tip.y, center.x, center.y);
-			ofScale(size/width, size/width);
+			ofScale(size/width*0.75, size/width*0.75);
 			myfont.drawString(palmText, 0, 0);
 		ofPopMatrix();
 
@@ -414,8 +426,8 @@ void ofApp::drawFeedback() {
 	<< "x: " << x << ", y: " << y << endl
 	<< "w: " << w << ", h: " << h << endl
 	<< "r: " << r << endl
-	// << "nearThreshold: " << nearThreshold << endl
-	// << "farThreshold: " << farThreshold << endl
+	<< "nearThreshold: " << nearThreshold << endl
+	<< "farThreshold: " << farThreshold << endl
 	// << "MAX_HAND_SIZE: " << contourFinder.MAX_HAND_SIZE << endl
 	// << "MIN_HAND_SIZE: " << contourFinder.MIN_HAND_SIZE << endl
 	// << "MAX_WRIST_WIDTH: " << contourFinder.MAX_WRIST_WIDTH << endl

@@ -134,6 +134,11 @@ void ofApp::transformInput()
 // Update the rippling effect
 void ofApp::updateRipples(){
 
+	// Ice starts breaking at frame 552 
+	// Breakage reaches the top aat 947 	
+	// Ice is gone at 1103
+	// Rivers exist at 1190 
+
 	// Water ripples
 	ripples.begin();
 		ofPushStyle();
@@ -161,7 +166,8 @@ void ofApp::updateRipples(){
 			}
 
 		ofPopMatrix();
-		riverMask.draw(0,0);
+		if(video.getCurrentFrame() > 1200)
+			riverMask.draw(0,0);
 		ofPopStyle();
 	ripples.end();
 	ripples.update();
@@ -382,9 +388,10 @@ void ofApp::drawFeedback() {
 	<< "MAX_WRIST_WIDTH: " << contourFinder.MAX_WRIST_WIDTH << endl
 	<< "hands found: " << hands.size() << endl
 	<< "contourFinder.size(): " << contourFinder.size() << endl
+	<< "frame: " << video.getCurrentFrame() << endl
 	<< ofToString(ofGetFrameRate()) << endl;
 
-	ofDrawBitmapString(reportStream.str(), 20, 652);
+	ofDrawBitmapString(reportStream.str(), 20, 600);
 	ofPopStyle();
 }
 
@@ -450,6 +457,12 @@ void ofApp::keyPressed(int key){
 		case 'f':
 			bFeedback = !bFeedback;
 			break;
+
+		case ' ':
+			if(video.isPaused())
+				video.setPaused(false);
+			else
+				video.setPaused(true);
 
 	}
 

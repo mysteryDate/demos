@@ -12,7 +12,7 @@ void ofApp::setup(){
 	kinect.open();
 	kinectImg.allocate(kinect.width, kinect.height);
 
-	nearThreshold = 250;
+	nearThreshold = 207;
 	farThreshold = 170;
 
 	//video instructions
@@ -37,6 +37,8 @@ void ofApp::setup(){
 	contourFinder.bounds[1] = 1;
 	contourFinder.bounds[2] = kinect.width - KINECT_CROP_LEFT - KINECT_CROP_RIGHT - 1;
 	contourFinder.bounds[3] = kinect.height - KINECT_CROP_TOP - KINECT_CROP_BOTTOM - 1;
+
+	noiseDist = 2;
 
 }
 
@@ -142,7 +144,7 @@ void ofApp::updateRipples(){
 	int ICE_START 		= 552;
 	int ALL_BROKEN 		= 947;
 	int ICE_STOP 		= 1103;
-	int RIVERS_START 	= 1190;
+	int RIVERS_START 	= 1150;
 
 	// Water ripples
 	ripples.begin();
@@ -169,17 +171,18 @@ void ofApp::updateRipples(){
 
 		ofSetColor(0,0,0);
 		ofFill();
-		if(frame >= ICE_START and frame <= ALL_BROKEN) {
-			ripples.damping = ofMap(frame, ICE_START, ALL_BROKEN, 0.995, 0);
-		}
-
-		if(frame > ALL_BROKEN and frame <= RIVERS_START) {
+		if(frame < ICE_START)
 			ofRect(0,0,video.getWidth(),video.getHeight());
-			ripples.damping = ofMap(frame, ALL_BROKEN, RIVERS_START, 0, 0.995);
+		if(frame >= ICE_START and frame <= ICE_START + 120) {
+			ripples.damping = ofMap(frame, ICE_START, ICE_START + 120, 0, 0.995);
 		}
-
-		if(frame > RIVERS_START)
+		if(frame > ALL_BROKEN and frame <= RIVERS_START) {
+			ripples.damping = ofMap(frame, ALL_BROKEN, RIVERS_START, 0.995, 0);
+		}
+		if(frame > RIVERS_START) {
+			ripples.damping = 0.995;
 			riverMask.draw(0,0);
+		}
 		ofPopStyle();
 
 	ripples.end();
@@ -250,23 +253,24 @@ void ofApp::updateHands(){
 	sort(hands.begin(), hands.end());
 
 	//Finally, the magic
-	int noiseDist = 0;
+	int ignoreDist = noiseDist * noiseDist;
 	for (int i = 0; i < hands.size(); ++i)
 	{
-		// ofPoint oldCentroid = hands[j].centroid;
-		// ofPoint newCentroid = newHands[i].centroid;
-		// ofPoint oldTip 		= hands[j].tip;
-		// ofPoint newTip 		= newHands[i].tip;
-
-		// int centDist = ofDistSquared(oldCentroid.x, oldCentroid.y, newCentroid.x, newCentroid.y);
-		// int tipDist = ofDistSquared(oldTip.x, oldTip.y, newTip.x, newTip.y);
-
-		// if(centDist > noiseDist or tipDist > noiseDist) {
-		// 	hands[j].centroid 	= newCentroid;
-		// 	hands[j].tip 		= newTip;
-		// }
-
+		ofPoint oldCentroid = hands[i].centroid;
+		ofPoint newCentroid = newHands[i].centroid;
+		ofPoint oldTip 		= hands[i].tip;
+		ofPoint newTip 		= newHands[i].tip;
+		
 		hands[i] = newHands[i];
+
+		int centDist = ofDistSquared(oldCentroid.x, oldCentroid.y, newCentroid.x, newCentroid.y);
+		int tipDist = ofDistSquared(oldTip.x, oldTip.y, newTip.x, newTip.y);
+
+		if(centDist < ignoreDist and tipDist < ignoreDist) {
+			hands[i].centroid 	= oldCentroid;
+			hands[i].tip 		= oldTip;
+		}
+
 
 	}
 }
@@ -383,15 +387,15 @@ void ofApp::drawFeedback() {
 
 	stringstream reportStream;
 
-	if (contourFinder.size() != 0)
-	{
-		ofRectangle rect = ofxCv::toOf(contourFinder.getBoundingRect(0));
-		reportStream
-		<< "left: " << rect.getLeft() << endl
-		<< "right: " << rect.getRight() << endl
-		<< "top: " << rect.getTop() << endl
-		<< "bottom: " << rect.getBottom() << endl;
-	}
+	// if (contourFinder.size() != 0)
+	// {
+	// 	ofRectangle rect = ofxCv::toOf(contourFinder.getBoundingRect(0));
+	// 	reportStream
+	// 	<< "left: " << rect.getLeft() << endl
+	// 	<< "right: " << rect.getRight() << endl
+	// 	<< "top: " << rect.getTop() << endl
+	// 	<< "bottom: " << rect.getBottom() << endl;
+	// }
 
 	reportStream 
 	<< "nearThreshold: " << nearThreshold << endl
@@ -399,8 +403,9 @@ void ofApp::drawFeedback() {
 	<< "MAX_HAND_SIZE: " << contourFinder.MAX_HAND_SIZE << endl
 	<< "MIN_HAND_SIZE: " << contourFinder.MIN_HAND_SIZE << endl
 	<< "MAX_WRIST_WIDTH: " << contourFinder.MAX_WRIST_WIDTH << endl
-	<< "hands found: " << hands.size() << endl
-	<< "contourFinder.size(): " << contourFinder.size() << endl
+	// << "hands found: " << hands.size() << endl
+	// << "contourFinder.size(): " << contourFinder.size() << endl
+	<< "noiseDist: " << noiseDist << endl
 	<< "frame: " << video.getCurrentFrame() << endl
 	<< ofToString(ofGetFrameRate()) << endl;
 
@@ -476,6 +481,14 @@ void ofApp::keyPressed(int key){
 				video.setPaused(false);
 			else
 				video.setPaused(true);
+
+		case 'D':
+			noiseDist++;
+			break;
+
+		case 'd':
+			noiseDist--;
+			break;
 
 	}
 

@@ -146,7 +146,7 @@ ofPoint ArmContourFinder::findTip(int n) {
 	if(tips.size() > n) {
 		ofPoint closestTip = polylines[n].getClosestPoint(tips[n]);
 		float dist = ofDistSquared(closestTip.x, closestTip.y, tips[n].x, tips[n].y);
-		if(dist < 10) { //TODO change magic number
+		if(dist < 4) { //TODO change magic number
 			return closestTip;
 		}
 	}

@@ -101,6 +101,7 @@ class ofApp : public ofBaseApp{
 
 		// Calibration
 		float x, y, w, h, r;
+		int noiseDist;
 		// Feedback
 		bool bFeedback;
 

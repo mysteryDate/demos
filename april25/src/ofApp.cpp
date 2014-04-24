@@ -25,7 +25,6 @@ void ofApp::setup(){
 	lineSmoothing = 4;
 	armScaleUp = 1.1;
 	myfont.loadFont("AltoPro-Normal.ttf", 12);
-	cout << "encoding: " << myfont.getEncoding() << endl;
 
 	//for water ripples
 	ofEnableAlphaBlending();
@@ -40,7 +39,7 @@ void ofApp::setup(){
 	contourFinder.bounds[2] = kinect.width - KINECT_CROP_LEFT - KINECT_CROP_RIGHT - 1;
 	contourFinder.bounds[3] = kinect.height - KINECT_CROP_TOP - KINECT_CROP_BOTTOM - 1;
 
-	noiseDist = 2;
+	noiseDist = 0;
 	smoothingRate = 0.5;
 
 	x = VIDEO_X;

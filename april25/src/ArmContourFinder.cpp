@@ -13,6 +13,7 @@ ArmContourFinder::ArmContourFinder() {
 	MIN_HAND_SIZE = 56;
 	MAX_HAND_SIZE = 99;
 	MAX_WRIST_WIDTH = 33;
+	MIN_WRIST_WIDTH = 10;
 
 }
 
@@ -185,6 +186,7 @@ vector < ofPoint > ArmContourFinder::findWrists(int n) {
 	int minSquared = MIN_HAND_SIZE * MIN_HAND_SIZE;
 	int maxSquared = MAX_HAND_SIZE * MAX_HAND_SIZE;
 	int maxWrist = MAX_WRIST_WIDTH * MAX_WRIST_WIDTH;
+	int minWrist = MIN_WRIST_WIDTH * MIN_WRIST_WIDTH;
 	float distSquared;
 	if(wrists[n].size() == 2) {
 		//If the old wrists still work, keep em
@@ -192,7 +194,7 @@ vector < ofPoint > ArmContourFinder::findWrists(int n) {
 		closestWrists.push_back(polylines[n].getClosestPoint(wrists[n][0]));
 		closestWrists.push_back(polylines[n].getClosestPoint(wrists[n][1]));
 		distSquared = ofDistSquared(closestWrists[0].x, closestWrists[0].y, closestWrists[1].x, closestWrists[1].y);
-		if(distSquared <= maxWrist) {
+		if(distSquared <= maxWrist and distSquared >= minWrist) {
 			float d1 = ofDistSquared(closestWrists[0].x, closestWrists[0].y, tips[n].x, tips[n].y);
 			float d2 = ofDistSquared(closestWrists[1].x, closestWrists[1].y, tips[n].x, tips[n].y);
 			if(d1 >= minSquared and d1 <= maxSquared and d2 >= minSquared and d2 <= maxSquared)
@@ -242,7 +244,7 @@ vector < ofPoint > ArmContourFinder::findWrists(int n) {
 		for (int j = 0; j < sideTwo.size(); ++j)
 		{
 			distSquared = ofDistSquared(sideOne[i].x, sideOne[i].y, sideTwo[j].x, sideTwo[j].y);
-			if(distSquared < shortestDist and distSquared <= maxWrist) {
+			if(distSquared < shortestDist and distSquared <= maxWrist and distSquared >= minWrist) {
 				possibleWrists.resize(2);
 				possibleWrists[0] = sideOne[i];
 				possibleWrists[1] = sideTwo[j];

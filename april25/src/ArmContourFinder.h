@@ -18,6 +18,7 @@ public:
 	int MIN_HAND_SIZE;
 	int MAX_HAND_SIZE;
 	int MAX_WRIST_WIDTH;
+	int MIN_WRIST_WIDTH;
 	int MAX_MOVEMENT_DISTANCE;
 
 	vector< int > bounds;

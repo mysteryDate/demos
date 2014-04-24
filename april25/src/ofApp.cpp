@@ -1,5 +1,6 @@
 #include "ofApp.h"
 #define RIVER_NUMBER 4
+#define FILE_NAME "rouge.txt"
 
 //--------------------------------------------------------------
 void ofApp::setup(){
@@ -39,6 +40,13 @@ void ofApp::setup(){
 	contourFinder.bounds[3] = kinect.height - KINECT_CROP_TOP - KINECT_CROP_BOTTOM - 1;
 
 	noiseDist = 2;
+	video.setFrame(1300);
+
+	x = VIDEO_X;
+	y = VIDEO_Y;
+	w = VIDEO_W;
+	h = VIDEO_H;
+	r = VIDEO_R;
 
 }
 
@@ -278,8 +286,10 @@ void ofApp::updateHands(){
 //--------------------------------------------------------------
 void ofApp::draw(){
 
-	// videoImg.draw(0,0);
-	bounce.draw(VIDEO_X, VIDEO_Y, VIDEO_W, VIDEO_H);
+	// bounce.draw(VIDEO_X, VIDEO_Y, VIDEO_W, VIDEO_H);
+	ofRotateZ(r);
+		bounce.draw(x,y,w,h);
+	ofRotateZ(-r);
 
 	drawHandOverlay();
 
@@ -398,11 +408,14 @@ void ofApp::drawFeedback() {
 	// }
 
 	reportStream 
-	<< "nearThreshold: " << nearThreshold << endl
-	<< "farThreshold: " << farThreshold << endl
-	<< "MAX_HAND_SIZE: " << contourFinder.MAX_HAND_SIZE << endl
-	<< "MIN_HAND_SIZE: " << contourFinder.MIN_HAND_SIZE << endl
-	<< "MAX_WRIST_WIDTH: " << contourFinder.MAX_WRIST_WIDTH << endl
+	<< "x: " << x << ", y: " << y << endl
+	<< "w: " << w << ", h: " << h << endl
+	<< "r: " << r << endl
+	// << "nearThreshold: " << nearThreshold << endl
+	// << "farThreshold: " << farThreshold << endl
+	// << "MAX_HAND_SIZE: " << contourFinder.MAX_HAND_SIZE << endl
+	// << "MIN_HAND_SIZE: " << contourFinder.MIN_HAND_SIZE << endl
+	// << "MAX_WRIST_WIDTH: " << contourFinder.MAX_WRIST_WIDTH << endl
 	// << "hands found: " << hands.size() << endl
 	// << "contourFinder.size(): " << contourFinder.size() << endl
 	<< "noiseDist: " << noiseDist << endl
@@ -448,29 +461,29 @@ void ofApp::keyPressed(int key){
 			if (nearThreshold < 0) nearThreshold = 0;
 			break;
 
-		case 'H':
-			contourFinder.MAX_HAND_SIZE++;
-			break;
+		// case 'H':
+		// 	contourFinder.MAX_HAND_SIZE++;
+		// 	break;
 
-		case 'h':
-			contourFinder.MAX_HAND_SIZE--;
-			break;
+		// case 'h':
+		// 	contourFinder.MAX_HAND_SIZE--;
+		// 	break;
 
-		case 'G':
-			contourFinder.MIN_HAND_SIZE++;
-			break;
+		// case 'G':
+		// 	contourFinder.MIN_HAND_SIZE++;
+		// 	break;
 
-		case 'g':
-			contourFinder.MIN_HAND_SIZE--;
-			break;
+		// case 'g':
+		// 	contourFinder.MIN_HAND_SIZE--;
+		// 	break;
 
-		case 'S':
-			contourFinder.MAX_WRIST_WIDTH++;
-			break;
+		// case 'S':
+		// 	contourFinder.MAX_WRIST_WIDTH++;
+		// 	break;
 
-		case 's':
-			contourFinder.MAX_WRIST_WIDTH--;
-			break;
+		// case 's':
+		// 	contourFinder.MAX_WRIST_WIDTH--;
+			// break;
 
 		case 'f':
 			bFeedback = !bFeedback;
@@ -490,12 +503,73 @@ void ofApp::keyPressed(int key){
 			noiseDist--;
 			break;
 
+		case OF_KEY_LEFT:
+			x--;
+			break;
+
+		case OF_KEY_RIGHT:
+			x++;
+			break;
+
+		case OF_KEY_UP:
+			y--;
+			break;
+
+		case OF_KEY_DOWN:
+			y++;
+			break;
+
+		case 'w':
+			w--;
+			break;
+
+		case 'W':
+			w++;
+			break;
+
+		case 'h':
+			h--;
+			break;
+
+		case 'H':
+			h++;
+			break;
+
+		case 'r':
+			r-=0.1;
+			break;
+
+		case 'R':
+			r+=0.1;
+			break;
+
+		
+
+		
+
+		// case 'W': {
+		// 	string riverVerteces;
+		// 	for (int i = 0; i < riverRegions[RIVER_NUMBER].size(); ++i)
+		// 	{
+		// 		riverVerteces.append(ofToString(riverRegions[RIVER_NUMBER][i].x));
+		// 		riverVerteces.append("\n");
+		// 		riverVerteces.append(ofToString(riverRegions[RIVER_NUMBER][i].y));
+		// 		riverVerteces.append("\n");
+		// 	}
+		// 	ofBuffer buff;
+		// 	buff.set(riverVerteces.c_str(), riverVerteces.size());
+		// 	ofBufferToFile(FILE_NAME, buff);
+		// 	break;
+		// }
 	}
 
 }
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
+
+	return;
+	// riverRegions[RIVER_NUMBER].addVertex(x, y);
 
 }
 

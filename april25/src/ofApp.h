@@ -15,11 +15,11 @@
 #define INPUT_DATA_R 0
 
 // Transforming video data to fit maquette
-#define VIDEO_X -78
-#define VIDEO_Y -82
-#define VIDEO_W 1884
+#define VIDEO_X -69
+#define VIDEO_Y -69
+#define VIDEO_W 1866
 #define VIDEO_H 1058
-#define VIDEO_R 1
+#define VIDEO_R 0.3
 // -----------------------------------
 
 #include "ofMain.h"

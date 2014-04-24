@@ -35,6 +35,8 @@ void ofApp::setup(){
 	bounce.allocate(1920, 1080);
 	riverMask.loadImage("riviere_masque_alpha.png");
 
+	bFeedback = false;
+
 }
 
 // Read in the proper regions for river display
@@ -162,9 +164,6 @@ void ofApp::updateHands(){
 
 	vector < Hand > newHands;
 
-	// Newhand -> oldhand association
-	map < int, int > association;
-
 	for (int i = 0; i < contourFinder.size(); ++i)
 	{
 		if(contourFinder.handFound[i]) {
@@ -175,9 +174,12 @@ void ofApp::updateHands(){
 			blob.wrists = contourFinder.wrists[i];
 			blob.ends = contourFinder.ends[i];
 			blob.label = contourFinder.getLabel(i);
+			blob.index = i;
 			newHands.push_back(blob);
 		}
 	}
+
+	sort(newHands.begin(), newHands.end());
 
 	// Remove dead ones
 	for (int i = 0; i < hands.size(); ++i)
@@ -187,7 +189,7 @@ void ofApp::updateHands(){
 		for (int j = 0; j < newHands.size(); ++j)
 		{
 			if(newHands[j].label == label) {
-				association[j] = i;
+				hands[i].index = newHands[j].index;
 				found = true;
 				break;
 			}
@@ -206,22 +208,22 @@ void ofApp::updateHands(){
 		for (int j = 0; j < hands.size(); ++j)
 		{
 			if(hands[j].label == label) {
-				association[i] = j;
+				hands[j].index = newHands[i].index;
 				found = true;
 				break;
 			}
 		}
 		if(!found) {
 			hands.push_back(newHands[i]);
-			association[i] = hands.size() - 1;
 		}
 	}
 
+	sort(hands.begin(), hands.end());
+
 	//Finally, the magic
 	int noiseDist = 0;
-	for (int i = 0; i < newHands.size(); ++i)
+	for (int i = 0; i < hands.size(); ++i)
 	{
-		int j = association[i];
 		// ofPoint oldCentroid = hands[j].centroid;
 		// ofPoint newCentroid = newHands[i].centroid;
 		// ofPoint oldTip 		= hands[j].tip;
@@ -235,7 +237,7 @@ void ofApp::updateHands(){
 		// 	hands[j].tip 		= newTip;
 		// }
 
-		hands[j] = newHands[i];
+		hands[i] = newHands[i];
 
 	}
 }
@@ -245,17 +247,11 @@ void ofApp::draw(){
 
 	// videoImg.draw(0,0);
 	bounce.draw(VIDEO_X, VIDEO_Y, VIDEO_W, VIDEO_H);
-	contourFinder.draw();
 
 	drawHandOverlay();
 
-	ofSetColor(0,255,0);
-	for (int i = 0; i < riverRegions.size(); ++i)
-	{
-		riverRegions[i].draw();
-	}
-
-	drawFeedback();
+	if(bFeedback)
+		drawFeedback();
 
 }
 
@@ -297,28 +293,6 @@ void ofApp::drawHandOverlay(){
 		tip.x = tip.x * INPUT_DATA_ZOOM + INPUT_DATA_DX;
 		tip.y = tip.y * INPUT_DATA_ZOOM + INPUT_DATA_DY;
 
-		ofPushStyle();
-			ofSetColor(255,255,255);
-			ofCircle(center, 3);
-			if(contourFinder.ends[i].size() == 2) {
-				ofFill();
-				ofCircle(contourFinder.ends[i][0], 3);
-				ofCircle(contourFinder.ends[i][1], 3);
-			}
-			if(true) {
-				ofCircle(contourFinder.tips[i], 3);
-				ofNoFill();
-				ofCircle(contourFinder.tips[i], contourFinder.MAX_HAND_SIZE);
-				ofCircle(contourFinder.tips[i], contourFinder.MIN_HAND_SIZE);
-			}
-			if(contourFinder.wrists[i].size() == 2) {
-				ofCircle(contourFinder.wrists[i][0], contourFinder.MAX_WRIST_WIDTH);
-				ofFill();
-				ofCircle(contourFinder.wrists[i][0], 3);
-				ofCircle(contourFinder.wrists[i][1], 3);
-			}
-		ofPopStyle();
-
 		for (int j = 0; j < riverRegions.size(); ++j)
 		{
 			if( riverRegions[j].inside(center) ) {
@@ -353,7 +327,30 @@ void ofApp::drawHandOverlay(){
 void ofApp::drawFeedback() {
 
 	ofPushStyle();
+	contourFinder.draw();
+
+	ofSetColor(255,255,255);
+	for (int i = 0; i < hands.size(); ++i)
+	{
+		ofCircle(hands[i].centroid, 3);
+		ofFill();
+		ofCircle(hands[i].ends[0], 3);
+		ofCircle(hands[i].ends[1], 3);
+		ofCircle(hands[i].tip, 3);
+		ofNoFill();
+		ofCircle(hands[i].tip, contourFinder.MAX_HAND_SIZE);
+		ofCircle(hands[i].tip, contourFinder.MIN_HAND_SIZE);
+		ofCircle(hands[i].wrists[0], contourFinder.MAX_WRIST_WIDTH);
+		ofFill();
+		ofCircle(hands[i].wrists[0], 3);
+		ofCircle(hands[i].wrists[1], 3);
+	}
+
 	ofSetColor(0,255,0);
+	for (int i = 0; i < riverRegions.size(); ++i)
+	{
+		riverRegions[i].draw();
+	}
 
 	stringstream reportStream;
 
@@ -438,6 +435,10 @@ void ofApp::keyPressed(int key){
 
 		case 's':
 			contourFinder.MAX_WRIST_WIDTH--;
+			break;
+
+		case 'f':
+			bFeedback = !bFeedback;
 			break;
 
 	}

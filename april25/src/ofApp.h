@@ -72,7 +72,14 @@ class ofApp : public ofBaseApp{
         	ofPoint tip;
         	vector< ofPoint > ends;
         	vector< ofPoint > wrists;
+        	int index;
         	unsigned int label;
+
+        	//For sorting by label
+        	bool operator < (const Hand& str) const
+        	{
+        		return (label < str.label);
+        	}
         };
         vector< Hand >		hands;
 
@@ -94,6 +101,8 @@ class ofApp : public ofBaseApp{
 
 		// Calibration
 		float x, y, w, h, r;
+		// Feedback
+		bool bFeedback;
 
 };
 

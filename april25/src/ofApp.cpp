@@ -85,8 +85,8 @@ void ofApp::fillInRiverRegions() {
 		riverRegions[i].close();
 	}
 
-	riverNames[0] = "Riviere des\nOutaouais";
-	riverNames[1] = "Riviere\ndu Nord";
+	riverNames[0] = "Rivi\xE8re des\nOutaouais";
+	riverNames[1] = "Rivière\ndu Nord";
 	riverNames[2] = "Riviere\nOuest";
 	riverNames[3] = "Riviere\nCalumet";
 	riverNames[4] = "Riviere\nRouge";
@@ -164,6 +164,7 @@ void ofApp::updateRipples(){
 			ofTranslate(INPUT_DATA_DX - VIDEO_X, INPUT_DATA_DY - VIDEO_Y);
 			ofScale(INPUT_DATA_ZOOM * video.getWidth() / VIDEO_W 
 				, INPUT_DATA_ZOOM * video.getHeight() / VIDEO_H);
+			ofRotateZ(-VIDEO_R);
 
 			for (int i = 0; i < hands.size(); ++i)
 			{
@@ -286,10 +287,9 @@ void ofApp::updateHands(){
 //--------------------------------------------------------------
 void ofApp::draw(){
 
-	// bounce.draw(VIDEO_X, VIDEO_Y, VIDEO_W, VIDEO_H);
-	ofRotateZ(r);
-		bounce.draw(x,y,w,h);
-	ofRotateZ(-r);
+	ofRotateZ(VIDEO_R);
+		bounce.draw(VIDEO_X, VIDEO_Y, VIDEO_W, VIDEO_H);
+	ofRotateZ(-VIDEO_R);
 
 	drawHandOverlay();
 
@@ -357,7 +357,10 @@ void ofApp::drawHandOverlay(){
 			ofRotateZ(angle);
 
 			ofPoint textCenter = myfont.getStringBoundingBox(palmText, 0, 0).getCenter();
+			float width = myfont.getStringBoundingBox(palmText, 0, 0).getWidth();
 			ofTranslate(-textCenter.x, -textCenter.y);
+			float size = ofDist(tip.x, tip.y, center.x, center.y);
+			ofScale(size/width, size/width);
 			myfont.drawString(palmText, 0, 0);
 		ofPopMatrix();
 

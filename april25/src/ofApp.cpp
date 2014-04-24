@@ -29,7 +29,7 @@ void ofApp::setup(){
 	ofEnableAlphaBlending();
 	ripples.allocate(1920, 1080);
 	bounce.allocate(1920, 1080);
-	riverMask.loadImage("riviere_masque_alpha.png");
+	riverMask.loadImage("river_mask_processed.png");
 
 	bFeedback = false;
 
@@ -138,6 +138,11 @@ void ofApp::updateRipples(){
 	// Breakage reaches the top aat 947 	
 	// Ice is gone at 1103
 	// Rivers exist at 1190 
+	int frame = video.getCurrentFrame();
+	int ICE_START 		= 552;
+	int ALL_BROKEN 		= 947;
+	int ICE_STOP 		= 1103;
+	int RIVERS_START 	= 1190;
 
 	// Water ripples
 	ripples.begin();
@@ -150,11 +155,6 @@ void ofApp::updateRipples(){
 			ofScale(INPUT_DATA_ZOOM * video.getWidth() / VIDEO_W 
 				, INPUT_DATA_ZOOM * video.getHeight() / VIDEO_H);
 
-		    float b = INPUT_DATA_ZOOM * video.getHeight() / VIDEO_W;
-		    float v = INPUT_DATA_ZOOM * video.getWidth() / VIDEO_H;
-		    float w = video.getWidth();
-		    float h = video.getHeight();
-
 			for (int i = 0; i < hands.size(); ++i)
 			{
 				ofBeginShape();
@@ -166,9 +166,22 @@ void ofApp::updateRipples(){
 			}
 
 		ofPopMatrix();
-		if(video.getCurrentFrame() > 1200)
+
+		ofSetColor(0,0,0);
+		ofFill();
+		if(frame >= ICE_START and frame <= ALL_BROKEN) {
+			ripples.damping = ofMap(frame, ICE_START, ALL_BROKEN, 0.995, 0);
+		}
+
+		if(frame > ALL_BROKEN and frame <= RIVERS_START) {
+			ofRect(0,0,video.getWidth(),video.getHeight());
+			ripples.damping = ofMap(frame, ALL_BROKEN, RIVERS_START, 0, 0.995);
+		}
+
+		if(frame > RIVERS_START)
 			riverMask.draw(0,0);
 		ofPopStyle();
+
 	ripples.end();
 	ripples.update();
 	bounce << ripples;

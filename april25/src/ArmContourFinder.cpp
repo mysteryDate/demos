@@ -59,9 +59,9 @@ ofPolyline ArmContourFinder::getHand(int n) {
 
 bool ArmContourFinder::findHand(int n) {
 
-	ends[n].clear();
-	tips[n] = ofPoint(0,0,0);
-	wrists[n].clear();
+	// ends[n].clear();
+	// tips[n] = ofPoint(0,0,0);
+	// wrists[n].clear();
 
 	//First, find ends
 	ends[n] = findEnds(n);
@@ -134,6 +134,25 @@ ofPoint ArmContourFinder::findTip(int n) {
 
 vector < ofPoint > ArmContourFinder::findWrists(int n) {
 
+	//Square our distances now, because premature optimization
+	int minSquared = MIN_HAND_SIZE * MIN_HAND_SIZE;
+	int maxSquared = MAX_HAND_SIZE * MAX_HAND_SIZE;
+	int maxWrist = MAX_WRIST_WIDTH * MAX_WRIST_WIDTH;
+	float distSquared;
+	if(wrists[n].size() == 2) {
+		//If the old wrists still work, keep em
+		vector< ofPoint > closestWrists;
+		closestWrists.push_back(polylines[n].getClosestPoint(wrists[n][0]));
+		closestWrists.push_back(polylines[n].getClosestPoint(wrists[n][1]));
+		distSquared = ofDistSquared(closestWrists[0].x, closestWrists[0].y, closestWrists[1].x, closestWrists[1].y);
+		if(distSquared <= maxWrist) {
+			float d1 = ofDistSquared(closestWrists[0].x, closestWrists[0].y, tips[n].x, tips[n].y);
+			float d2 = ofDistSquared(closestWrists[1].x, closestWrists[1].y, tips[n].x, tips[n].y);
+			if(d1 >= minSquared and d1 <= maxSquared and d2 >= minSquared and d2 <= maxSquared)
+				return closestWrists;
+		}
+	}
+
 	//One polyline for each side of the hand
 	ofPolyline sideOne, sideTwo;
 
@@ -145,13 +164,9 @@ vector < ofPoint > ArmContourFinder::findWrists(int n) {
 	polylines[n].getClosestPoint(ends[n][0], &endOne);
 	polylines[n].getClosestPoint(ends[n][1], &endTwo);
 
-	//Square our distances now, because premature optimization
-	int minSquared = MIN_HAND_SIZE * MIN_HAND_SIZE;
-	int maxSquared = MAX_HAND_SIZE * MAX_HAND_SIZE;
 
 	//Put all verteces within the right distance in one set
 	int i = start;
-	float distSquared; // The distance between points and the tip
 	while(i != endOne and i != endTwo) {
 		distSquared = ofDistSquared(tips[n].x, tips[n].y, polylines[n][i].x, polylines[n][i].y);
 		if(distSquared <= maxSquared and distSquared >= minSquared)
@@ -173,14 +188,14 @@ vector < ofPoint > ArmContourFinder::findWrists(int n) {
 	}
 
 	// Now find the closest two points on these lines
-	float shortestDist = MAX_WRIST_WIDTH * MAX_WRIST_WIDTH + 1;
+	float shortestDist = maxWrist + 1;
 	vector< ofPoint > possibleWrists;
 	for (int i = 0; i < sideOne.size(); ++i)
 	{
 		for (int j = 0; j < sideTwo.size(); ++j)
 		{
 			distSquared = ofDistSquared(sideOne[i].x, sideOne[i].y, sideTwo[j].x, sideTwo[j].y);
-			if(distSquared < shortestDist and distSquared <= MAX_WRIST_WIDTH * MAX_WRIST_WIDTH) {
+			if(distSquared < shortestDist and distSquared <= maxWrist) {
 				possibleWrists.resize(2);
 				possibleWrists[0] = sideOne[i];
 				possibleWrists[1] = sideTwo[j];

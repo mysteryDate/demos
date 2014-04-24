@@ -1,6 +1,6 @@
 #include "ofApp.h"
-#define RIVER_NUMBER 4
-#define FILE_NAME "rouge.txt"
+#define RIVER_NUMBER 2
+#define FILE_NAME "ouest.txt"
 
 //--------------------------------------------------------------
 void ofApp::setup(){
@@ -48,6 +48,8 @@ void ofApp::setup(){
 	w = VIDEO_W;
 	h = VIDEO_H;
 	r = VIDEO_R;
+
+	// video.setFrame(1300);
 
 }
 
@@ -271,11 +273,15 @@ void ofApp::updateHands(){
 		ofPoint oldKeypoints[] = {hands[i].centroid, hands[i].ends[0], hands[i].ends[1], hands[i].tip, hands[i].wrists[0], hands[i].wrists[1]};
 		ofPoint * keypoints[] = {&handCopy.centroid, &handCopy.ends[0], &handCopy.ends[1], &handCopy.tip, &handCopy.wrists[0], &handCopy.wrists[1]};
 
+		if(newHands[i].centroid.x == 0 and newHands[i].centroid.y == 0)
+			continue;
+		else{
 		for (int i = 0; i < 6; ++i)
 		{
 			float smoothedX = ofLerp(keypoints[i]->x, oldKeypoints[i].x, smoothingRate);
 			float smoothedY = ofLerp(keypoints[i]->y, oldKeypoints[i].y, smoothingRate);
 			*keypoints[i] = ofPoint(smoothedX, smoothedY);
+		}
 		}
 
 		ofPoint oldCentroid = hands[i].centroid;
@@ -538,9 +544,9 @@ void ofApp::keyPressed(int key){
 			w--;
 			break;
 
-		case 'W':
-			w++;
-			break;
+		// case 'W':
+		// 	w++;
+		// 	break;
 
 		case 'h':
 			h--;
@@ -583,8 +589,8 @@ void ofApp::keyPressed(int key){
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
 
-	return;
 	// riverRegions[RIVER_NUMBER].addVertex(x, y);
+	return;
 
 }
 

@@ -50,6 +50,8 @@ ofPolyline ArmContourFinder::getHand(int n) {
 		if( i == polylines[n].size() )
 			i = 0;
 	}
+	hand.addVertex( polylines[n][end] );
+	
 	// So that it closes up;
 	hand.setClosed(true);
 
@@ -87,17 +89,17 @@ bool ArmContourFinder::findHand(int n) {
 vector< ofPoint > ArmContourFinder::findEnds(int n) {
 
 	// if ends are still good, use em
-	if(ends[n].size() == 2) {
-		vector < ofPoint > closestEnds;
-		closestEnds.push_back(polylines[n].getClosestPoint(ends[n][0]));
-		closestEnds.push_back(polylines[n].getClosestPoint(ends[n][1]));
-		if( (closestEnds[0].x <= bounds[0] + 0 || closestEnds[0].y <= bounds[1] + 0
- 			|| closestEnds[0].x >= bounds[2] - 2 || closestEnds[0].y >=  bounds[3] - 2) and 
-			(closestEnds[0].x <= bounds[0] + 0 || closestEnds[0].y <= bounds[1] + 0
- 			|| closestEnds[0].x >= bounds[2] - 2 || closestEnds[0].y >=  bounds[3] - 2) )
-				//Biggest conditional statement ever? Seeing if the two are still on the edge
-				return closestEnds;
-	}
+	// if(ends[n].size() == 2) {
+	// 	vector < ofPoint > closestEnds;
+	// 	closestEnds.push_back(polylines[n].getClosestPoint(ends[n][0]));
+	// 	closestEnds.push_back(polylines[n].getClosestPoint(ends[n][1]));
+	// 	if( (closestEnds[0].x <= bounds[0] + 0 || closestEnds[0].y <= bounds[1] + 0
+ // 			|| closestEnds[0].x >= bounds[2] - 2 || closestEnds[0].y >=  bounds[3] - 2) and 
+	// 		(closestEnds[0].x <= bounds[0] + 0 || closestEnds[0].y <= bounds[1] + 0
+ // 			|| closestEnds[0].x >= bounds[2] - 2 || closestEnds[0].y >=  bounds[3] - 2) )
+	// 			//Biggest conditional statement ever? Seeing if the two are still on the edge
+	// 			return closestEnds;
+	// }
 
 	vector< ofPoint > pts = polylines[n].getVertices();
 	vector< ofPoint > endPoints;
@@ -109,18 +111,34 @@ vector< ofPoint > ArmContourFinder::findEnds(int n) {
 			endPoints.push_back(pts[i]);
 		}
 	}
-	if(endPoints.size() >= 2) {
-		//Assume the first one is right, find the most distant second one
+	if(endPoints.size() > 0) {
+		// Just take the one that's the farthest from the center of the box
+		ofPoint center = ofxCv::toOf(getCenter(n));
 		float maxDist = 0;
-		for (int j = 1; j < endPoints.size(); ++j)
+		for (int i = 0; i < endPoints.size(); ++i)
 		{
-			float dist = ofDistSquared(endPoints[0].x, endPoints[0].y, endPoints[j].x, endPoints[j].y);
+			float dist = ofDistSquared(center.x, center.y, endPoints[i].x, endPoints[i].y);
 			if(dist > maxDist) {
 				maxDist = dist;
-				endPoints[1] = endPoints[j];
+				endPoints[0] = endPoints[i];
 			}
 		}
+
+		// TODO: just make one end
 		endPoints.resize(2);
+		endPoints[1] = endPoints[0];
+
+		//Assume the first one is right, find the most distant second one
+		// float maxDist = 0;
+		// for (int j = 1; j < endPoints.size(); ++j)
+		// {
+		// 	float dist = ofDistSquared(endPoints[0].x, endPoints[0].y, endPoints[j].x, endPoints[j].y);
+		// 	if(dist > maxDist) {
+		// 		maxDist = dist;
+		// 		endPoints[1] = endPoints[j];
+		// 	}
+		// }
+		// endPoints.resize(2);
 	}
 	if(endPoints.size() == 0) {
 		ofPoint centroid = polylines[n].getCentroid2D();

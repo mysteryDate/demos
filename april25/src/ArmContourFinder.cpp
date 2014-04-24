@@ -93,7 +93,7 @@ vector< ofPoint > ArmContourFinder::findEnds(int n) {
 	for (int i = 0; i < pts.size(); ++i)
 	{
 		if(pts[i].x <= bounds[0] + 0 || pts[i].y <= bounds[1] + 0
- 			|| pts[i].x >= bounds[2] - 5 || pts[i].y >=  bounds[3] - 5) {
+ 			|| pts[i].x >= bounds[2] - 2 || pts[i].y >=  bounds[3] - 2) {
 			endPoints.push_back(pts[i]);
 		}
 	}

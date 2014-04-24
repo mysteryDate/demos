@@ -11,10 +11,6 @@ void ofApp::setup(){
 	kinect.init();
 	kinect.open();
 	kinectImg.allocate(kinect.width, kinect.height);
-	// kinectImg.setROI(KINECT_CROP_LEFT, KINECT_CROP_RIGHT, 
-	// 	kinect.width - KINECT_CROP_LEFT - KINECT_CROP_RIGHT,
-	// 	kinect.height - KINECT_CROP_TOP - KINECT_CROP_BOTTOM);
-	// processedImg.allocate(kinect.width*INPUT_DATA_ZOOM, kinect.height*INPUT_DATA_ZOOM);
 
 	nearThreshold = 250;
 	farThreshold = 170;
@@ -36,6 +32,11 @@ void ofApp::setup(){
 	riverMask.loadImage("riviere_masque_alpha.png");
 
 	bFeedback = false;
+
+	contourFinder.bounds[0] = 1;
+	contourFinder.bounds[1] = 1;
+	contourFinder.bounds[2] = kinect.width - KINECT_CROP_LEFT - KINECT_CROP_RIGHT - 1;
+	contourFinder.bounds[3] = kinect.height - KINECT_CROP_TOP - KINECT_CROP_BOTTOM - 1;
 
 }
 
@@ -139,20 +140,29 @@ void ofApp::updateRipples(){
 		ofPushMatrix();
 			ofFill();
 			ofSetColor(255,255,255);
+			// Put the data reference frame into the untransformed video reference
+			ofTranslate(INPUT_DATA_DX - VIDEO_X, INPUT_DATA_DY - VIDEO_Y);
+			ofScale(INPUT_DATA_ZOOM * video.getWidth() / VIDEO_W 
+				, INPUT_DATA_ZOOM * video.getHeight() / VIDEO_H);
 
-			ofEllipse(mouseX, mouseY, 10, 10);
-			for (int i = 0; i < contourFinder.size(); ++i)
+		    float b = INPUT_DATA_ZOOM * video.getHeight() / VIDEO_W;
+		    float v = INPUT_DATA_ZOOM * video.getWidth() / VIDEO_H;
+		    float w = video.getWidth();
+		    float h = video.getHeight();
+
+			for (int i = 0; i < hands.size(); ++i)
 			{
 				ofBeginShape();
-				for (int j = 0; j < contourFinder.getPolyline(i).size(); ++j)
+				for (int j = 0; j < hands[i].line.size(); ++j)
 				{
-					ofVertex(contourFinder.getPolyline(i)[j]);
+					ofVertex(hands[i].line[j]);
 				}
 				ofEndShape();
 			}
-			riverMask.draw(0,0);
-		ofPopStyle();
+
 		ofPopMatrix();
+		riverMask.draw(0,0);
+		ofPopStyle();
 	ripples.end();
 	ripples.update();
 	bounce << ripples;
@@ -307,10 +317,10 @@ void ofApp::drawHandOverlay(){
 			float h = sqrt( pow(center.x - tip.x, 2) + pow(center.y - tip.y, 2) );
 			float angle =  ofRadToDeg( asin( (tip.y - center.y) / h ));
 			if(tip.x < center.x) angle *= -1;
-			// ofPoint exit = contourFinder.ends[i][0];
-			// if (exit.y <= contourFinder.bounds[1] + 5) angle += 180;
-			// if ( (exit.x <= contourFinder.bounds[0] + 5 or exit.x >= contourFinder.bounds[2] - 5 ) and tip.y < center.y ) 
-			// 	angle += 180;
+			ofPoint exit = hands[i].ends[0];
+			if (exit.y <= contourFinder.bounds[1] + 5) angle += 180;
+			if ( (exit.x <= contourFinder.bounds[0] + 5 or exit.x >= contourFinder.bounds[2] - 5 ) and tip.y < center.y ) 
+				angle += 180;
 			ofRotateZ(angle);
 
 			ofPoint textCenter = myfont.getStringBoundingBox(palmText, 0, 0).getCenter();

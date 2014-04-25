@@ -341,6 +341,7 @@ void ofApp::drawHandOverlay(){
 
 	ofPopMatrix();
 
+    if(video.getCurrentFrame() > 1100) {
 	// Drawing text onto hands
 	ofSetColor(255,255,255);
 	for (int i = 0; i < hands.size(); ++i)
@@ -382,6 +383,7 @@ void ofApp::drawHandOverlay(){
 		ofPopMatrix();
 
 	}
+    }
 
 	ofPopStyle();
 	ofPopMatrix();

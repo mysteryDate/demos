@@ -34,7 +34,12 @@ void ofApp::setup(){
 
 	bFeedback = true;
 
-	contourFinder.setMinArea(contourFinder.MIN_HAND_SIZE * contourFinder.MIN_HAND_SIZE / 2);
+	MIN_CONTOUR_AREA = 1500;
+	MAX_CONTOUR_AREA = 1600;
+	CONTOUR_THRESHOLD = 1;
+	contourFinder.setMinArea(MIN_CONTOUR_AREA);
+	contourFinder.setMaxArea(MAX_CONTOUR_AREA);
+	// contourFinder.setThreshold(CONTOUR_THRESHOLD);
 	contourFinder.bounds[0] = 1;
 	contourFinder.bounds[1] = 1;
 	contourFinder.bounds[2] = kinect.width - KINECT_CROP_LEFT - KINECT_CROP_RIGHT - 1;
@@ -464,9 +469,9 @@ void ofApp::drawFeedback() {
 	// }
 
 	reportStream 
-	<< "x: " << x << ", y: " << y << endl
-	<< "w: " << w << ", h: " << h << endl
-	<< "r: " << r << endl
+	// << "x: " << x << ", y: " << y << endl
+	// << "w: " << w << ", h: " << h << endl
+	// << "r: " << r << endl
 	<< "nearThreshold: " << nearThreshold << endl
 	<< "farThreshold: " << farThreshold << endl
 	// << "MAX_HAND_SIZE: " << contourFinder.MAX_HAND_SIZE << endl
@@ -474,7 +479,10 @@ void ofApp::drawFeedback() {
 	// << "MAX_WRIST_WIDTH: " << contourFinder.MAX_WRIST_WIDTH << endl
 	// << "hands found: " << hands.size() << endl
 	// << "contourFinder.size(): " << contourFinder.size() << endl
-	<< "noiseDist: " << noiseDist << endl
+	// << "noiseDist: " << noiseDist << endl
+	<< "MAX_CONTOUR_AREA: " << MAX_CONTOUR_AREA << endl
+	<< "MIN_CONTOUR_AREA: " << MIN_CONTOUR_AREA << endl
+	<< "CONTOUR_THRESHOLD: " << CONTOUR_THRESHOLD << endl
 	<< "frame: " << video.getCurrentFrame() << endl
 	<< ofToString(ofGetFrameRate()) << endl;
 
@@ -552,52 +560,82 @@ void ofApp::keyPressed(int key){
 				video.setPaused(true);
 			break;
 
-		case 'D':
-			noiseDist++;
-			break;
+		// case 'D':
+		// 	noiseDist++;
+		// 	break;
 
-		case 'd':
-			noiseDist--;
-			break;
+		// case 'd':
+		// 	noiseDist--;
+		// 	break;
 
-		case OF_KEY_LEFT:
-			x--;
-			break;
+		// case OF_KEY_LEFT:
+		// 	x--;
+		// 	break;
 
-		case OF_KEY_RIGHT:
-			x++;
-			break;
+		// case OF_KEY_RIGHT:
+		// 	x++;
+		// 	break;
 
-		case OF_KEY_UP:
-			y--;
-			break;
+		// case OF_KEY_UP:
+		// 	y--;
+		// 	break;
 
-		case OF_KEY_DOWN:
-			y++;
-			break;
+		// case OF_KEY_DOWN:
+		// 	y++;
+		// 	break;
 
-		case 'w':
-			w--;
-			break;
+		// case 'w':
+		// 	w--;
+		// 	break;
 
 		// case 'W':
 		// 	w++;
 		// 	break;
 
-		case 'h':
-			h--;
+		// case 'h':
+		// 	h--;
+		// 	break;
+
+		// case 'H':
+		// 	h++;
+		// 	break;
+
+		// case 'r':
+		// 	r-=0.1;
+		// 	break;
+
+		// case 'R':
+		// 	r+=0.1;
+		// 	break;
+
+		case 'A':
+			MAX_CONTOUR_AREA *= 1.1;
+			contourFinder.setMaxArea(MAX_CONTOUR_AREA);
 			break;
 
-		case 'H':
-			h++;
+		case 'a':
+			MAX_CONTOUR_AREA *= 0.9;
+			contourFinder.setMaxArea(MAX_CONTOUR_AREA);
 			break;
 
-		case 'r':
-			r-=0.1;
+		case 'Q':
+			MIN_CONTOUR_AREA *= 1.1;
+			contourFinder.setMinArea(MIN_CONTOUR_AREA);
 			break;
 
-		case 'R':
-			r+=0.1;
+		case 'q':
+			MIN_CONTOUR_AREA *= 0.9;
+			contourFinder.setMinArea(MIN_CONTOUR_AREA);
+			break;
+
+		case 'T':
+			CONTOUR_THRESHOLD *= 1.1;
+			contourFinder.setThreshold(CONTOUR_THRESHOLD);
+			break;
+
+		case 't':
+			CONTOUR_THRESHOLD *= 0.9;
+			contourFinder.setThreshold(CONTOUR_THRESHOLD);
 			break;
 
 		

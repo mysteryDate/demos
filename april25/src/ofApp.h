@@ -108,6 +108,8 @@ class ofApp : public ofBaseApp{
 		int noiseDist;
 		// Feedback
 		bool bFeedback;
+		// CV calibration
+		float MAX_CONTOUR_AREA, MIN_CONTOUR_AREA, CONTOUR_THRESHOLD;
 
 };
 

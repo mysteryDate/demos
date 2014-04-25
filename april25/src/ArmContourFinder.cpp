@@ -13,7 +13,7 @@ ArmContourFinder::ArmContourFinder() {
 	MIN_HAND_SIZE = 56;
 	MAX_HAND_SIZE = 99;
 	MAX_WRIST_WIDTH = 33;
-	MIN_WRIST_WIDTH = 20;
+	MIN_WRIST_WIDTH = 15;
 
 }
 
@@ -26,7 +26,7 @@ void ArmContourFinder::update() {
 	wrists.resize(size);
 	tips.resize(size);
 	handFound.resize(size, false);
-	side.resize(size, -1);
+	// side.resize(size, -1);
 
 	for (int i = 0; i < size; ++i)
 	{
@@ -112,22 +112,24 @@ ofPoint ArmContourFinder::findEnd(int n) {
 		}
 
 		endPoints.resize(1);
-		
-		if(endPoints[0].x <= bounds[0]) side[n] = 0;
-		else if(endPoints[0].y <= bounds[1]) side[n] = 1;
-		else if(endPoints[0].x >= bounds[2] - 5) side[n] = 2;
-		else if(endPoints[0].y >= bounds[3] - 5) side[n] = 3;
+		unsigned int label = getLabel(n);
+
+		if(endPoints[0].x <= bounds[0] + 10) side[label] = 0;
+		else if(endPoints[0].y <= bounds[1] + 10) side[label] = 1;
+		else if(endPoints[0].x >= bounds[2] - 10) side[label] = 2;
+		else if(endPoints[0].y >= bounds[3] - 10) side[label] = 3;
 	}
 
 
 	if(endPoints.size() == 0) {
 		ofPoint centroid = polylines[n].getCentroid2D();
+		int thisSide = side[getLabel(n)];
 		// assume they're still on the same side
 		ofPoint mark;
-		if(side[n] == 0 or side[n] == 2)
-			mark = ofPoint(bounds[side[n]], centroid.y); // TODO, any side
+		if(thisSide == 0 or thisSide == 2)
+			mark = ofPoint(bounds[thisSide], centroid.y); // TODO, any side
 		else
-			mark = ofPoint(centroid.x, bounds[side[n]]);
+			mark = ofPoint(centroid.x, bounds[thisSide]);
 		endPoints.push_back(polylines[n].getClosestPoint(mark));
 	}
 

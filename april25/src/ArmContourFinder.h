@@ -11,7 +11,6 @@ public:
 	vector< ofPoint > tips;
 	vector< vector< ofPoint > > wrists;
 	vector< bool > handFound;
-	vector< int > side;
 
 	void update();
 	ofPolyline getHand(int n);
@@ -23,6 +22,9 @@ public:
 	int MAX_MOVEMENT_DISTANCE;
 
 	vector< int > bounds;
+
+	// Just so things remember their dies
+	map< unsigned int, int > side;
 
 private:
 

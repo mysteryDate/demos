@@ -13,7 +13,7 @@ void ofApp::setup(){
 	kinect.open();
 	kinectImg.allocate(kinect.width, kinect.height);
 
-	nearThreshold = 207;
+	nearThreshold = 192;
 	farThreshold = 165;
 
 	//video instructions
@@ -34,8 +34,8 @@ void ofApp::setup(){
 
 	bFeedback = true;
 
-	MIN_CONTOUR_AREA = 1500;
-	MAX_CONTOUR_AREA = 1600;
+	MIN_CONTOUR_AREA = 1000;
+	MAX_CONTOUR_AREA = 16000;
 	CONTOUR_THRESHOLD = 1;
 	contourFinder.setMinArea(MIN_CONTOUR_AREA);
 	contourFinder.setMaxArea(MAX_CONTOUR_AREA);
@@ -428,6 +428,7 @@ void ofApp::drawFeedback() {
 	ofSetColor(0,255,0);
 	for (int i = 0; i < contourFinder.size(); ++i)
 	{
+		ofDrawBitmapString(ofToString(contourFinder.side[i]),100,100);
 		ofPolyline rotatedRect = ofxCv::toOf(contourFinder.getMinAreaRect(i));
 		// ofCircle(contourFinder.ends[i], 3);
 		rotatedRect.draw();

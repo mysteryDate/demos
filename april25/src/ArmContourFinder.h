@@ -11,6 +11,7 @@ public:
 	vector< ofPoint > tips;
 	vector< vector< ofPoint > > wrists;
 	vector< bool > handFound;
+	vector< int > side;
 
 	void update();
 	ofPolyline getHand(int n);

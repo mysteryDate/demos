@@ -26,6 +26,7 @@ void ArmContourFinder::update() {
 	wrists.resize(size);
 	tips.resize(size);
 	handFound.resize(size, false);
+	side.resize(size, -1);
 
 	for (int i = 0; i < size; ++i)
 	{
@@ -111,43 +112,72 @@ ofPoint ArmContourFinder::findEnd(int n) {
 		}
 
 		endPoints.resize(1);
+		
+		if(endPoints[0].x <= bounds[0]) side[n] = 0;
+		else if(endPoints[0].y <= bounds[1]) side[n] = 1;
+		else if(endPoints[0].x >= bounds[2] - 5) side[n] = 2;
+		else if(endPoints[0].y >= bounds[3] - 5) side[n] = 3;
 	}
+
+
 	if(endPoints.size() == 0) {
 		ofPoint centroid = polylines[n].getCentroid2D();
-		ofPoint mark = ofPoint(centroid.x, bounds[3]); // TODO, any side
+		// assume they're still on the same side
+		ofPoint mark;
+		if(side[n] == 0 or side[n] == 2)
+			mark = ofPoint(bounds[side[n]], centroid.y); // TODO, any side
+		else
+			mark = ofPoint(centroid.x, bounds[side[n]]);
 		endPoints.push_back(polylines[n].getClosestPoint(mark));
 	}
 
+
 	// New tactic!
-	vector< ofPoint > rotatedRect = ofxCv::toOf(getMinAreaRect(n)).getVertices();
+	ofPolyline rotatedRect = ofxCv::toOf(getMinAreaRect(n));
+	vector< ofPoint > verts = rotatedRect.getVertices();
 
 	// Remove two farthest from endpoint
 	for (int i = 0; i < 2; ++i)
 	{
 		float maxDist = 0;			
 		int indexToRemove;
-		for (int i = 0; i < rotatedRect.size(); ++i)
+		for (int i = 0; i < verts.size(); ++i)
 		{
-			float dist = ofDistSquared(endPoints[0].x, endPoints[0].y, rotatedRect[i].x, rotatedRect[i].y);
+			float dist = ofDistSquared(endPoints[0].x, endPoints[0].y, verts[i].x, verts[i].y);
 			if(dist > maxDist) {
 				maxDist = dist;
 				indexToRemove = i;
 			}
 		}
-		rotatedRect.erase(rotatedRect.begin() + indexToRemove);
+		verts.erase(verts.begin() + indexToRemove);
 	}
+
 
 	ofPoint end;
 
 	float maxDist = 0;
-	for (int i = 0; i < rotatedRect.size(); ++i)
+	vector< float > distances;
+	for (int i = 0; i < verts.size(); ++i)
 	{
-		float dist = ofDistSquared(rotatedRect[i].x, rotatedRect[i].y, center.x, center.y);
+		float dist = ofDistSquared(verts[i].x, verts[i].y, center.x, center.y);
+		distances.push_back(dist);
 		if(dist > maxDist) {
 			maxDist = dist;
-			end = rotatedRect[i];
+			end = verts[i];
 		}
 	}
+
+	if(distances.size() == 2) {
+		if( abs(distances[0] - distances[1]) < 400 ) {
+			float d1 = ofDistSquared(ends[n].x, ends[n].y, verts[0].x, verts[0].y);
+			float d2 = ofDistSquared(ends[n].x, ends[n].y, verts[1].x, verts[1].y);
+			if(d1 < d2)
+				end = verts[0];
+			else
+				end = verts[1];
+		}
+	}
+
 
 	return end;
 

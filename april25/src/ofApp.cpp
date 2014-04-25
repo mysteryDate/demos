@@ -32,8 +32,9 @@ void ofApp::setup(){
 	bounce.allocate(1920, 1080);
 	riverMask.loadImage("river_mask_processed.png");
 
-	bFeedback = false;
+	bFeedback = true;
 
+	contourFinder.setMinArea(contourFinder.MIN_HAND_SIZE * contourFinder.MIN_HAND_SIZE / 2);
 	contourFinder.bounds[0] = 1;
 	contourFinder.bounds[1] = 1;
 	contourFinder.bounds[2] = kinect.width - KINECT_CROP_LEFT - KINECT_CROP_RIGHT - 1;
@@ -396,6 +397,7 @@ void ofApp::drawFeedback() {
 	for (int i = 0; i < contourFinder.size(); ++i)
 	{
 		ofPolyline rotatedRect = ofxCv::toOf(contourFinder.getMinAreaRect(i));
+		ofCircle(contourFinder.ends[i], 3);
 		rotatedRect.draw();
 	}
 

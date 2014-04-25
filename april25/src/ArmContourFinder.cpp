@@ -89,6 +89,7 @@ ofPoint ArmContourFinder::findEnd(int n) {
 
 	vector< ofPoint > pts = polylines[n].getVertices();
 	vector< ofPoint > endPoints;
+	ofPoint center = ofxCv::toOf(getCenter(n));
 
 	for (int i = 0; i < pts.size(); ++i)
 	{
@@ -99,7 +100,6 @@ ofPoint ArmContourFinder::findEnd(int n) {
 	}
 	if(endPoints.size() > 0) {
 		// Just take the one that's the farthest from the center of the box
-		ofPoint center = ofxCv::toOf(getCenter(n));
 		float maxDist = 0;
 		for (int i = 0; i < endPoints.size(); ++i)
 		{
@@ -114,11 +114,42 @@ ofPoint ArmContourFinder::findEnd(int n) {
 	}
 	if(endPoints.size() == 0) {
 		ofPoint centroid = polylines[n].getCentroid2D();
-		ofPoint mark = ofPoint(centroid.x, bounds[3]);
+		ofPoint mark = ofPoint(centroid.x, bounds[3]); // TODO, any side
 		endPoints.push_back(polylines[n].getClosestPoint(mark));
 	}
 
-	return endPoints[0];
+	// New tactic!
+	vector< ofPoint > rotatedRect = ofxCv::toOf(getMinAreaRect(n)).getVertices();
+
+	// Remove two farthest from endpoint
+	for (int i = 0; i < 2; ++i)
+	{
+		float maxDist = 0;			
+		int indexToRemove;
+		for (int i = 0; i < rotatedRect.size(); ++i)
+		{
+			float dist = ofDistSquared(endPoints[0].x, endPoints[0].y, rotatedRect[i].x, rotatedRect[i].y);
+			if(dist > maxDist) {
+				maxDist = dist;
+				indexToRemove = i;
+			}
+		}
+		rotatedRect.erase(rotatedRect.begin() + indexToRemove);
+	}
+
+	ofPoint end;
+
+	float maxDist = 0;
+	for (int i = 0; i < rotatedRect.size(); ++i)
+	{
+		float dist = ofDistSquared(rotatedRect[i].x, rotatedRect[i].y, center.x, center.y);
+		if(dist > maxDist) {
+			maxDist = dist;
+			end = rotatedRect[i];
+		}
+	}
+
+	return end;
 
 }
 

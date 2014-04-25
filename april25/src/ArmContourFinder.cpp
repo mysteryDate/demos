@@ -13,7 +13,7 @@ ArmContourFinder::ArmContourFinder() {
 	MIN_HAND_SIZE = 56;
 	MAX_HAND_SIZE = 99;
 	MAX_WRIST_WIDTH = 33;
-	MIN_WRIST_WIDTH = 10;
+	MIN_WRIST_WIDTH = 20;
 
 }
 
@@ -158,8 +158,8 @@ ofPoint ArmContourFinder::findTip(int n) {
 	//Create a line connecting the center of the base of the arm to the center of the bounding box
 	ofPoint boxCenter = ofxCv::toOf(getCenter(n));
 
-	float xn = 2*boxCenter.x - ends[n].x;
-	float yn = 2*boxCenter.y - ends[n].y;
+	float xn = 3*boxCenter.x - 2*ends[n].x;
+	float yn = 3*boxCenter.y - 2*ends[n].y;
 	
 	ofPoint mark = ofPoint(xn, yn);
 

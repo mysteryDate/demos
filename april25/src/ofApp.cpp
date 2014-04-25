@@ -14,7 +14,7 @@ void ofApp::setup(){
 	kinectImg.allocate(kinect.width, kinect.height);
 
 	nearThreshold = 207;
-	farThreshold = 164;
+	farThreshold = 165;
 
 	//video instructions
 	video.loadMovie("Map_Argenteuil_v5.mov");
@@ -49,7 +49,8 @@ void ofApp::setup(){
 	h = VIDEO_H;
 	r = VIDEO_R;
 
-	// video.setFrame(1300);
+	video.setFrame(1300);
+	video.setPaused(true);
 
 }
 
@@ -217,6 +218,7 @@ void ofApp::updateHands(){
 			blob.tip = contourFinder.tips[i];
 			blob.wrists = contourFinder.wrists[i];
 			blob.end = contourFinder.ends[i];
+			blob.boxCenter = ofxCv::toOf(contourFinder.getCenter(i));
 			blob.label = contourFinder.getLabel(i);
 			blob.index = i;
 			newHands.push_back(blob);
@@ -368,9 +370,34 @@ void ofApp::drawHandOverlay(){
 			float h = sqrt( pow(center.x - tip.x, 2) + pow(center.y - tip.y, 2) );
 			float angle =  ofRadToDeg( asin( (tip.y - center.y) / h ));
 			if(tip.x < center.x) angle *= -1;
-			ofPoint exit = hands[i].end;
-			if (exit.y <= contourFinder.bounds[1] + 5) angle += 180;
-			if ( (exit.x <= contourFinder.bounds[0] + 5 or exit.x >= contourFinder.bounds[2] - 5 ) and tip.y < center.y ) 
+			// Figure out which side the person is standing on
+			float m = (hands[i].boxCenter.y - hands[i].centroid.y) / (hands[i].boxCenter.x - hands[i].centroid.x);
+			int side = -1;
+			int direction = 1;
+			if(hands[i].centroid.x > hands[i].boxCenter.x)
+				direction *= -1;
+			if(hands[i].centroid.x == hands[i].boxCenter.x) {
+				if(hands[i].centroid.y > hands[i].boxCenter.y )
+					side = 3;
+				else
+					side = 1;
+			}
+			ofPoint pos = hands[i].boxCenter;
+			while(side == -1) {
+				pos.x += direction;
+				pos.y += direction * m;
+				if(pos.x >= contourFinder.bounds[2]) 
+					side = 2;
+				if(pos.x <= contourFinder.bounds[0])
+					side = 0;
+				if(pos.y <= contourFinder.bounds[1])
+					side = 1;
+				if(pos.y >= contourFinder.bounds[3])
+					side = 3;
+			}
+
+			if (side == 1) angle += 180;
+			if ( (side == 0 or side == 2 ) and tip.y < center.y ) 
 				angle += 180;
 			ofRotateZ(angle);
 
@@ -397,7 +424,7 @@ void ofApp::drawFeedback() {
 	for (int i = 0; i < contourFinder.size(); ++i)
 	{
 		ofPolyline rotatedRect = ofxCv::toOf(contourFinder.getMinAreaRect(i));
-		ofCircle(contourFinder.ends[i], 3);
+		// ofCircle(contourFinder.ends[i], 3);
 		rotatedRect.draw();
 	}
 
@@ -412,6 +439,7 @@ void ofApp::drawFeedback() {
 		ofCircle(hands[i].tip, contourFinder.MAX_HAND_SIZE);
 		ofCircle(hands[i].tip, contourFinder.MIN_HAND_SIZE);
 		ofCircle(hands[i].wrists[0], contourFinder.MAX_WRIST_WIDTH);
+		ofCircle(hands[i].wrists[0], contourFinder.MIN_WRIST_WIDTH);
 		ofFill();
 		ofCircle(hands[i].wrists[0], 3);
 		ofCircle(hands[i].wrists[1], 3);
@@ -517,11 +545,12 @@ void ofApp::keyPressed(int key){
 			bFeedback = !bFeedback;
 			break;
 
-		case ' ':
+		case ' ': 
 			if(video.isPaused())
 				video.setPaused(false);
 			else
 				video.setPaused(true);
+			break;
 
 		case 'D':
 			noiseDist++;

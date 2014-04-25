@@ -72,6 +72,7 @@ class ofApp : public ofBaseApp{
         	ofPoint centroid;
         	ofPoint tip;
         	ofPoint end;
+        	ofPoint boxCenter;
         	vector< ofPoint > wrists;
         	int index;
         	unsigned int label;

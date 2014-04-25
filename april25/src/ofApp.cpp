@@ -272,9 +272,8 @@ void ofApp::updateHands(){
 		ofPoint oldKeypoints[] = {hands[i].centroid, hands[i].end, hands[i].tip, hands[i].wrists[0], hands[i].wrists[1]};
 		ofPoint * keypoints[] = {&handCopy.centroid, &handCopy.end, &handCopy.tip, &handCopy.wrists[0], &handCopy.wrists[1]};
 
-		if(newHands[i].centroid.x == 0 and newHands[i].centroid.y == 0) //TODO
-			continue;
-		else{
+		if( !(newHands[i].centroid.x == 0 and newHands[i].centroid.y == 0) ) 
+		{
 			for (int i = 0; i < 5; ++i)
 			{
 				float smoothedX = ofLerp(keypoints[i]->x, oldKeypoints[i].x, smoothingRate);
@@ -393,6 +392,12 @@ void ofApp::drawFeedback() {
 
 	ofPushStyle();
 	contourFinder.draw();
+	ofSetColor(0,255,0);
+	for (int i = 0; i < contourFinder.size(); ++i)
+	{
+		ofPolyline rotatedRect = ofxCv::toOf(contourFinder.getMinAreaRect(i));
+		rotatedRect.draw();
+	}
 
 	ofSetColor(255,255,255);
 	for (int i = 0; i < hands.size(); ++i)

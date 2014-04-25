@@ -87,19 +87,6 @@ bool ArmContourFinder::findHand(int n) {
 
 ofPoint ArmContourFinder::findEnd(int n) {
 
-	// if ends are still good, use em
-	// if(ends[n].size() == 2) {
-	// 	vector < ofPoint > closestEnds;
-	// 	closestEnds.push_back(polylines[n].getClosestPoint(ends[n]));
-	// 	closestEnds.push_back(polylines[n].getClosestPoint(ends[n]));
-	// 	if( (closestEnds[0].x <= bounds[0] + 0 || closestEnds[0].y <= bounds[1] + 0
- // 			|| closestEnds[0].x >= bounds[2] - 2 || closestEnds[0].y >=  bounds[3] - 2) and 
-	// 		(closestEnds[0].x <= bounds[0] + 0 || closestEnds[0].y <= bounds[1] + 0
- // 			|| closestEnds[0].x >= bounds[2] - 2 || closestEnds[0].y >=  bounds[3] - 2) )
-	// 			//Biggest conditional statement ever? Seeing if the two are still on the edge
-	// 			return closestEnds;
-	// }
-
 	vector< ofPoint > pts = polylines[n].getVertices();
 	vector< ofPoint > endPoints;
 

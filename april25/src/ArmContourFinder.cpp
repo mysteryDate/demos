@@ -158,15 +158,12 @@ ofPoint ArmContourFinder::findTip(int n) {
 	//Create a line connecting the center of the base of the arm to the center of the bounding box
 	ofPoint boxCenter = ofxCv::toOf(getCenter(n));
 
-	// Slope of the line
-	float m = (boxCenter.y - ends[n].y) / (boxCenter.x - ends[n].x);
-	float yn = 2*(boxCenter.y - ends[n].y);	// New y coordinate (far off)
-	// if(boxCenter.y < ends[n].y) 
-	// 	yn *= -1;
-	float xn = (yn - ends[n].y) / m + ends[n].x;
-	ofPoint mostDistant = ofPoint(xn, yn);
+	float xn = 2*boxCenter.x - ends[n].x;
+	float yn = 2*boxCenter.y - ends[n].y;
+	
+	ofPoint mark = ofPoint(xn, yn);
 
-	ofPoint newTip = polylines[n].getClosestPoint(mostDistant);
+	ofPoint newTip = polylines[n].getClosestPoint(mark);
 
 	//If our old tip is still good, keep it
 	if(tips.size() > n) {

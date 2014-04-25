@@ -67,15 +67,13 @@ bool ArmContourFinder::findHand(int n) {
 	// wrists[n].clear();
 
 	//First, find ends
-	ends[n] = findEnds(n);
-	//If failure
-	if(ends[n].size() != 2) return false;
+	ends[n] = findEnd(n);
 
 	//Now, get the tip
 	tips[n] = findTip(n);
 	//See if it's far enough away
-	float d1 = ofDistSquared(tips[n].x, tips[n].y, ends[n][0].x, ends[n][0].y);
-	float d2 = ofDistSquared(tips[n].x, tips[n].y, ends[n][1].x, ends[n][1].y);
+	float d1 = ofDistSquared(tips[n].x, tips[n].y, ends[n].x, ends[n].y);
+	float d2 = ofDistSquared(tips[n].x, tips[n].y, ends[n].x, ends[n].y);
 	if( d1 < MIN_HAND_SIZE * MIN_HAND_SIZE and d2 < MIN_HAND_SIZE * MIN_HAND_SIZE )
 		return false; // Too small!
 
@@ -87,13 +85,13 @@ bool ArmContourFinder::findHand(int n) {
 
 }
 
-vector< ofPoint > ArmContourFinder::findEnds(int n) {
+ofPoint ArmContourFinder::findEnd(int n) {
 
 	// if ends are still good, use em
 	// if(ends[n].size() == 2) {
 	// 	vector < ofPoint > closestEnds;
-	// 	closestEnds.push_back(polylines[n].getClosestPoint(ends[n][0]));
-	// 	closestEnds.push_back(polylines[n].getClosestPoint(ends[n][1]));
+	// 	closestEnds.push_back(polylines[n].getClosestPoint(ends[n]));
+	// 	closestEnds.push_back(polylines[n].getClosestPoint(ends[n]));
 	// 	if( (closestEnds[0].x <= bounds[0] + 0 || closestEnds[0].y <= bounds[1] + 0
  // 			|| closestEnds[0].x >= bounds[2] - 2 || closestEnds[0].y >=  bounds[3] - 2) and 
 	// 		(closestEnds[0].x <= bounds[0] + 0 || closestEnds[0].y <= bounds[1] + 0
@@ -125,30 +123,15 @@ vector< ofPoint > ArmContourFinder::findEnds(int n) {
 			}
 		}
 
-		// TODO: just make one end
-		endPoints.resize(2);
-		endPoints[1] = endPoints[0];
-
-		//Assume the first one is right, find the most distant second one
-		// float maxDist = 0;
-		// for (int j = 1; j < endPoints.size(); ++j)
-		// {
-		// 	float dist = ofDistSquared(endPoints[0].x, endPoints[0].y, endPoints[j].x, endPoints[j].y);
-		// 	if(dist > maxDist) {
-		// 		maxDist = dist;
-		// 		endPoints[1] = endPoints[j];
-		// 	}
-		// }
-		// endPoints.resize(2);
+		endPoints.resize(1);
 	}
 	if(endPoints.size() == 0) {
 		ofPoint centroid = polylines[n].getCentroid2D();
 		ofPoint mark = ofPoint(centroid.x, bounds[3]);
 		endPoints.push_back(polylines[n].getClosestPoint(mark));
-		endPoints.push_back(endPoints[0]);
 	}
 
-	return endPoints;
+	return endPoints[0];
 
 }
 
@@ -156,13 +139,13 @@ ofPoint ArmContourFinder::findTip(int n) {
 
 	//Create a line connecting the center of the base of the arm to the center of the bounding box
 	ofPoint boxCenter = ofxCv::toOf(getCenter(n));
-	ofPoint baseCenter = ofPoint((ends[n][0].x + ends[n][1].x)/2, (ends[n][0].y + ends[n][1].y)/2 );
+
 	// Slope of the line
-	float m = (boxCenter.y - baseCenter.y) / (boxCenter.x - baseCenter.x);
-	float yn = 2*(boxCenter.y - baseCenter.y);	// New y coordinate (far off)
-	// if(boxCenter.y < baseCenter.y) 
+	float m = (boxCenter.y - ends[n].y) / (boxCenter.x - ends[n].x);
+	float yn = 2*(boxCenter.y - ends[n].y);	// New y coordinate (far off)
+	// if(boxCenter.y < ends[n].y) 
 	// 	yn *= -1;
-	float xn = (yn - baseCenter.y) / m + baseCenter.x;
+	float xn = (yn - ends[n].y) / m + ends[n].x;
 	ofPoint mostDistant = ofPoint(xn, yn);
 
 	ofPoint newTip = polylines[n].getClosestPoint(mostDistant);
@@ -206,17 +189,16 @@ vector < ofPoint > ArmContourFinder::findWrists(int n) {
 	ofPolyline sideOne, sideTwo;
 
 	//The indeces at which the split will occur
-	unsigned int start, endOne, endTwo;
+	unsigned int start, end;
 
 	//Find those indeces, not sure if this is computationally expensive (premature optimization, anyone?)
 	polylines[n].getClosestPoint(tips[n], &start);
-	polylines[n].getClosestPoint(ends[n][0], &endOne);
-	polylines[n].getClosestPoint(ends[n][1], &endTwo);
+	polylines[n].getClosestPoint(ends[n], &end);
 
 
 	//Put all verteces within the right distance in one set
 	int i = start;
-	while(i != endOne and i != endTwo) {
+	while(i != end) {
 		distSquared = ofDistSquared(tips[n].x, tips[n].y, polylines[n][i].x, polylines[n][i].y);
 		if(distSquared <= maxSquared and distSquared >= minSquared)
 			sideOne.addVertex( polylines[n][i] );
@@ -227,7 +209,7 @@ vector < ofPoint > ArmContourFinder::findWrists(int n) {
 
 	//Now grab all the suitable ones on the other side
 	i = start;
-	while(i != endOne and i != endTwo) {
+	while(i != end) {
 		distSquared = ofDistSquared(tips[n].x, tips[n].y, polylines[n][i].x, polylines[n][i].y);
 		if(distSquared <= maxSquared and distSquared >= minSquared)
 			sideTwo.addVertex( polylines[n][i] );

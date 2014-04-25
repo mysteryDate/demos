@@ -215,7 +215,7 @@ void ofApp::updateHands(){
 			blob.centroid = blob.line.getCentroid2D();
 			blob.tip = contourFinder.tips[i];
 			blob.wrists = contourFinder.wrists[i];
-			blob.ends = contourFinder.ends[i];
+			blob.end = contourFinder.ends[i];
 			blob.label = contourFinder.getLabel(i);
 			blob.index = i;
 			newHands.push_back(blob);
@@ -269,18 +269,18 @@ void ofApp::updateHands(){
 	{
 		Hand handCopy = newHands[i];
 
-		ofPoint oldKeypoints[] = {hands[i].centroid, hands[i].ends[0], hands[i].ends[1], hands[i].tip, hands[i].wrists[0], hands[i].wrists[1]};
-		ofPoint * keypoints[] = {&handCopy.centroid, &handCopy.ends[0], &handCopy.ends[1], &handCopy.tip, &handCopy.wrists[0], &handCopy.wrists[1]};
+		ofPoint oldKeypoints[] = {hands[i].centroid, hands[i].end, hands[i].tip, hands[i].wrists[0], hands[i].wrists[1]};
+		ofPoint * keypoints[] = {&handCopy.centroid, &handCopy.end, &handCopy.tip, &handCopy.wrists[0], &handCopy.wrists[1]};
 
-		if(newHands[i].centroid.x == 0 and newHands[i].centroid.y == 0)
+		if(newHands[i].centroid.x == 0 and newHands[i].centroid.y == 0) //TODO
 			continue;
 		else{
-		for (int i = 0; i < 6; ++i)
-		{
-			float smoothedX = ofLerp(keypoints[i]->x, oldKeypoints[i].x, smoothingRate);
-			float smoothedY = ofLerp(keypoints[i]->y, oldKeypoints[i].y, smoothingRate);
-			*keypoints[i] = ofPoint(smoothedX, smoothedY);
-		}
+			for (int i = 0; i < 5; ++i)
+			{
+				float smoothedX = ofLerp(keypoints[i]->x, oldKeypoints[i].x, smoothingRate);
+				float smoothedY = ofLerp(keypoints[i]->y, oldKeypoints[i].y, smoothingRate);
+				*keypoints[i] = ofPoint(smoothedX, smoothedY);
+			}
 		}
 
 		ofPoint oldCentroid = hands[i].centroid;
@@ -368,7 +368,7 @@ void ofApp::drawHandOverlay(){
 			float h = sqrt( pow(center.x - tip.x, 2) + pow(center.y - tip.y, 2) );
 			float angle =  ofRadToDeg( asin( (tip.y - center.y) / h ));
 			if(tip.x < center.x) angle *= -1;
-			ofPoint exit = hands[i].ends[0];
+			ofPoint exit = hands[i].end;
 			if (exit.y <= contourFinder.bounds[1] + 5) angle += 180;
 			if ( (exit.x <= contourFinder.bounds[0] + 5 or exit.x >= contourFinder.bounds[2] - 5 ) and tip.y < center.y ) 
 				angle += 180;
@@ -399,8 +399,7 @@ void ofApp::drawFeedback() {
 	{
 		ofCircle(hands[i].centroid, 3);
 		ofFill();
-		ofCircle(hands[i].ends[0], 3);
-		ofCircle(hands[i].ends[1], 3);
+		ofCircle(hands[i].end, 3);
 		ofCircle(hands[i].tip, 3);
 		ofNoFill();
 		ofCircle(hands[i].tip, contourFinder.MAX_HAND_SIZE);

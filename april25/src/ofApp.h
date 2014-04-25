@@ -71,7 +71,7 @@ class ofApp : public ofBaseApp{
         	ofPolyline line;
         	ofPoint centroid;
         	ofPoint tip;
-        	vector< ofPoint > ends;
+        	ofPoint end;
         	vector< ofPoint > wrists;
         	int index;
         	unsigned int label;

@@ -7,7 +7,7 @@ public:
 
 	ArmContourFinder();
 
-	vector< vector< ofPoint > > ends;
+	vector< ofPoint > ends;
 	vector< ofPoint > tips;
 	vector< vector< ofPoint > > wrists;
 	vector< bool > handFound;
@@ -26,7 +26,7 @@ public:
 private:
 
 	bool findHand(int n);
-	vector< ofPoint > 	findEnds(int n);
+	ofPoint			 	findEnd(int n);
 	ofPoint				findTip(int n);
 	vector< ofPoint > 	findWrists(int n);
 

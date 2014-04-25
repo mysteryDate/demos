@@ -3,4 +3,5 @@ ofxOpenCv
 ofxXmlSettings
 ofxCv
 ofxFX
+ofxTrueTypeFontUC
 ofxUI

@@ -29,6 +29,7 @@
 #include "ArmContourFinder.h"
 #include "ofxRipples.h"
 #include "ofxBounce.h" 
+#include "ofxTrueTypeFontUC.h"
 #include <cmath>
 
 class ofApp : public ofBaseApp{
@@ -93,7 +94,8 @@ class ofApp : public ofBaseApp{
 		ofPolyline			waterRegion;
 		vector< ofPolyline>	riverRegions;
 		const char * 		riverNames[5];
-		ofTrueTypeFont		myfont;
+		ofxTrueTypeFontUC		myfont;
+    
 
 		// For water effect
 		ofxRipples	ripples;

@@ -159,9 +159,9 @@ ofPoint ArmContourFinder::findTip(int n) {
 	ofPoint baseCenter = ofPoint((ends[n][0].x + ends[n][1].x)/2, (ends[n][0].y + ends[n][1].y)/2 );
 	// Slope of the line
 	float m = (boxCenter.y - baseCenter.y) / (boxCenter.x - baseCenter.x);
-	float yn = 5000;	// New y coordinate (far off)
-	if(boxCenter.y < baseCenter.y) 
-		yn *= -1;
+	float yn = 2*(boxCenter.y - baseCenter.y);	// New y coordinate (far off)
+	// if(boxCenter.y < baseCenter.y) 
+	// 	yn *= -1;
 	float xn = (yn - baseCenter.y) / m + baseCenter.x;
 	ofPoint mostDistant = ofPoint(xn, yn);
 

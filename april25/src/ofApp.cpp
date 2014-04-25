@@ -87,11 +87,11 @@ void ofApp::fillInRiverRegions() {
 		riverRegions[i].close();
 	}
 
-	riverNames[0] = "Riviere des\nOutaouais";
-	riverNames[1] = "Riviere\ndu Nord";
-	riverNames[2] = "Riviere\nOuest";
-	riverNames[3] = "Riviere\nCalumet";
-	riverNames[4] = "Riviere\nRouge";
+	riverNames[0] = "Rivière des\nOutaouais";
+	riverNames[1] = "Rivière\ndu Nord";
+	riverNames[2] = "Rivière\nOuest";
+	riverNames[3] = "Rivière\nCalumet";
+	riverNames[4] = "Rivière\nRouge";
 
 }
 

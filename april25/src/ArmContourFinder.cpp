@@ -82,7 +82,7 @@ bool ArmContourFinder::findHand(int n) {
 	wrists[n] = findWrists(n);
 	if( wrists[n].size() != 2 ) return false;
 
-	refitTip(n);
+	tips[n] = refitTip(n);
 
 	return true;
 

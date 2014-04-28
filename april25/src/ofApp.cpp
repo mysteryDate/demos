@@ -430,7 +430,8 @@ void ofApp::drawFeedback() {
 	ofSetColor(0,255,0);
 	for (int i = 0; i < contourFinder.size(); ++i)
 	{
-		ofDrawBitmapString(ofToString(contourFinder.side[i]),100,100);
+		unsigned int label = contourFinder.getLabel(i);
+		ofDrawBitmapString(ofToString(contourFinder.side[label]),100,100);
 		
 		ofPolyline rotatedRect = ofxCv::toOf(contourFinder.getMinAreaRect(i));
 		// ofCircle(contourFinder.ends[i], 3);

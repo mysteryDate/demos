@@ -219,13 +219,13 @@ void ofApp::updateHands(){
 	{
 		if(contourFinder.handFound[i]) {
 			Hand blob;
+			blob.label = contourFinder.getLabel(i);
 			blob.line = contourFinder.getHand(i);
 			blob.centroid = blob.line.getCentroid2D();
-			blob.tip = contourFinder.tips[i];
-			blob.wrists = contourFinder.wrists[i];
-			blob.end = contourFinder.ends[i];
+			blob.tip = contourFinder.tips[blob.label];
+			blob.wrists = contourFinder.wrists[blob.label];
+			blob.end = contourFinder.ends[blob.label];
 			blob.boxCenter = ofxCv::toOf(contourFinder.getCenter(i));
-			blob.label = contourFinder.getLabel(i);
 			blob.index = i;
 			newHands.push_back(blob);
 		}

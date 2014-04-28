@@ -7,9 +7,10 @@ public:
 
 	ArmContourFinder();
 
-	vector< ofPoint > ends;
-	vector< ofPoint > tips;
-	vector< vector< ofPoint > > wrists;
+	// The keys are the labels
+	map< int, ofPoint > ends;
+	map< int, ofPoint > tips;
+	map< int, vector< ofPoint > > wrists;
 	vector< bool > handFound;
 
 	void update();

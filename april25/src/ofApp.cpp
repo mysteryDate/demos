@@ -168,7 +168,6 @@ void ofApp::updateRipples(){
 		ofPushStyle();
 		ofPushMatrix();
 			ofFill();
-			ofSetColor(255,255,255);
 			// Put the data reference frame into the untransformed video reference
 			ofTranslate(INPUT_DATA_DX - VIDEO_X, INPUT_DATA_DY - VIDEO_Y);
 			ofScale(INPUT_DATA_ZOOM * video.getWidth() / VIDEO_W 
@@ -177,6 +176,8 @@ void ofApp::updateRipples(){
 
 			for (int i = 0; i < hands.size(); ++i)
 			{
+				float color = ofMap(hands[i].velocity.length(), 1, 8, 0, 255, true);
+				ofSetColor(color, color, color);
 				ofBeginShape();
 				for (int j = 0; j < hands[i].line.size(); ++j)
 				{
@@ -288,6 +289,7 @@ void ofApp::updateHands(){
 				float smoothedY = ofLerp(keypoints[i]->y, oldKeypoints[i].y, smoothingRate);
 				*keypoints[i] = ofPoint(smoothedX, smoothedY);
 			}
+			handCopy.velocity = ofVec2f((keypoints[0]->x - oldKeypoints[0].x)/2, (keypoints[0]->y - oldKeypoints[0].y)/2);
 		}
 
 		ofPoint oldCentroid = hands[i].centroid;
@@ -429,6 +431,7 @@ void ofApp::drawFeedback() {
 	for (int i = 0; i < contourFinder.size(); ++i)
 	{
 		ofDrawBitmapString(ofToString(contourFinder.side[i]),100,100);
+		
 		ofPolyline rotatedRect = ofxCv::toOf(contourFinder.getMinAreaRect(i));
 		// ofCircle(contourFinder.ends[i], 3);
 		rotatedRect.draw();
@@ -437,6 +440,7 @@ void ofApp::drawFeedback() {
 	ofSetColor(255,255,255);
 	for (int i = 0; i < hands.size(); ++i)
 	{
+		ofDrawBitmapString(ofToString(hands[i].velocity.length()),100,130);
 		ofCircle(hands[i].centroid, 3);
 		ofFill();
 		ofCircle(hands[i].end, 3);

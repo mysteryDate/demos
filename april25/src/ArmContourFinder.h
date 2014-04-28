@@ -23,7 +23,7 @@ public:
 
 	vector< int > bounds;
 
-	// Just so things remember their dies
+	// Just so things remember their sides
 	map< unsigned int, int > side;
 
 private:

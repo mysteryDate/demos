@@ -76,6 +76,7 @@ class ofApp : public ofBaseApp{
         	vector< ofPoint > wrists;
         	int index;
         	unsigned int label;
+        	ofVec2f velocity;
 
         	//For sorting by label
         	bool operator < (const Hand& str) const

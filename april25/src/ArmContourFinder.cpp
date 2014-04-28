@@ -82,6 +82,8 @@ bool ArmContourFinder::findHand(int n) {
 	wrists[n] = findWrists(n);
 	if( wrists[n].size() != 2 ) return false;
 
+	refitTip(n);
+
 	return true;
 
 }
@@ -284,5 +286,30 @@ vector < ofPoint > ArmContourFinder::findWrists(int n) {
 
 	return possibleWrists;
 
+}
+
+ofPoint ArmContourFinder::refitTip(int n)
+{	
+	ofPoint midWrist = ofPoint( (wrists[n][0].x + wrists[n][1].x)/2, (wrists[n][0].y + wrists[n][1].y)/2 );
+
+	unsigned int start, end;
+	polylines[n].getClosestPoint(wrists[n][1], &start);
+	polylines[n].getClosestPoint(wrists[n][0], &end);
+
+	ofPoint newTip;
+	float maxDist = 0;
+	int i = start;
+	while( i != end ) {
+		float dist = ofDistSquared(midWrist.x, midWrist.y, polylines[n][i].x, polylines[n][i].y);
+		if(dist > maxDist) {
+			maxDist = dist;
+			newTip = polylines[n][i];
+		}
+		i++;
+		if( i == polylines[n].size() )
+			i = 0;
+	}
+	
+	return newTip;
 }
 

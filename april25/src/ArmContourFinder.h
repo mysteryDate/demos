@@ -32,6 +32,7 @@ private:
 	ofPoint			 	findEnd(int n);
 	ofPoint				findTip(int n);
 	vector< ofPoint > 	findWrists(int n);
+	ofPoint 			refitTip(int n);
 
 	void addHand(int n);
 

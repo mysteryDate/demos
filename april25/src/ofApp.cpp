@@ -15,7 +15,7 @@ void ofApp::setup(){
 	kinectBackground.allocate(kinect.width, kinect.height);
 	kinectBackground.set(0);
 
-	nearThreshold = 192;
+	nearThreshold = 50;
 	farThreshold = 2;
 
 	//video instructions
@@ -223,14 +223,15 @@ void ofApp::updateHands(){
 
 	for (int i = 0; i < contourFinder.size(); ++i)
 	{
-		if(contourFinder.handFound[i]) {
+		unsigned int l = contourFinder.getLabel(i);
+		if(contourFinder.handFound[l]) {
 			Hand blob;
-			blob.label = contourFinder.getLabel(i);
+			blob.label = l;
 			blob.line = contourFinder.getHand(i);
 			blob.centroid = blob.line.getCentroid2D();
-			blob.tip = contourFinder.tips[blob.label];
-			blob.wrists = contourFinder.wrists[blob.label];
-			blob.end = contourFinder.ends[blob.label];
+			blob.tip = contourFinder.tips[l];
+			blob.wrists = contourFinder.wrists[l];
+			blob.end = contourFinder.ends[l];
 			blob.boxCenter = ofxCv::toOf(contourFinder.getCenter(i));
 			blob.index = i;
 			newHands.push_back(blob);

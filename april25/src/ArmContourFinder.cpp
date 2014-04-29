@@ -20,19 +20,16 @@ ArmContourFinder::ArmContourFinder() {
 void ArmContourFinder::update() {
 
 	//To run every frame
-	int size = polylines.size();
-	handFound.resize(size);
-	// side.resize(size, -1);
 
-	for (int i = 0; i < size; ++i)
+	for (int i = 0; i < polylines.size(); ++i)
 	{
-		handFound[i] = findHand(i);
+		handFound[getLabel(i)] = findHand(i);
 	}
 }
 
 ofPolyline ArmContourFinder::getHand(int n) {
 
-	if(!handFound[n]) return;
+	if(!handFound[getLabel(n)]) return;
 
 	ofPolyline hand;
 
@@ -66,6 +63,8 @@ bool ArmContourFinder::findHand(int n) {
 	unsigned int l = getLabel(n);
 	//First, find ends
 	ends[l] = findEnd(n);
+	if( ends[l].x == -1 and ends[l].y == -1)
+		return false;
 
 	//Now, get the tip
 	tips[l] = findTip(n);
@@ -130,16 +129,20 @@ ofPoint ArmContourFinder::findEnd(int n) {
 
 
 	if(endPoints.size() == 0) {
-		ofPoint centroid = polylines[n].getCentroid2D();
-		int thisSide = side[l];
-		// assume they're still on the same side
-		ofPoint mark;
-		if(thisSide == 0 or thisSide == 2)
-			mark = ofPoint(bounds[thisSide], centroid.y); // TODO, any side
-		else
-			mark = ofPoint(centroid.x, bounds[thisSide]);
-		endPoints.push_back(polylines[n].getClosestPoint(mark));
+		if(handFound[l]) {
+			ofPoint centroid = polylines[n].getCentroid2D();
+			int thisSide = side[l];
+			// assume they're still on the same side
+			ofPoint mark;
+			if(thisSide == 0 or thisSide == 2)
+				mark = ofPoint(bounds[thisSide], centroid.y); // TODO, any side
+			else
+				mark = ofPoint(centroid.x, bounds[thisSide]);
+			endPoints.push_back(polylines[n].getClosestPoint(mark));
+		}
+		else return ofPoint(-1, -1);
 	}
+
 
 
 	// New tactic!

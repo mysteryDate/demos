@@ -12,9 +12,12 @@ void ofApp::setup(){
 	kinect.init();
 	kinect.open();
 	kinectImg.allocate(kinect.width, kinect.height);
+	kinectBackground.allocate(kinect.width, kinect.height);
+	kinectBackground.set(0);
 
 	nearThreshold = 192;
 	farThreshold = 165;
+	farThreshold = 2;
 
 	//video instructions
 	video.loadMovie("Map_Argenteuil_v5.mov");
@@ -40,6 +43,8 @@ void ofApp::setup(){
 	contourFinder.setMinArea(MIN_CONTOUR_AREA);
 	contourFinder.setMaxArea(MAX_CONTOUR_AREA);
 	// contourFinder.setThreshold(CONTOUR_THRESHOLD);
+	// contourFinder.setMaxArea(MAX_CONTOUR_AREA);
+
 	contourFinder.bounds[0] = 1;
 	contourFinder.bounds[1] = 1;
 	contourFinder.bounds[2] = kinect.width - KINECT_CROP_LEFT - KINECT_CROP_RIGHT - 1;
@@ -136,14 +141,17 @@ void ofApp::update(){
 void ofApp::transformInput()
 {
 	unsigned char *pix = kinectImg.getPixels();
+	unsigned char *bpix = kinectBackground.getPixels();
 
 	int numPix = kinectImg.getWidth() * kinectImg.getHeight();
 
 	for (int i = 0; i < numPix; ++i)
 	{
-		if(pix[i] > nearThreshold or pix[i] < farThreshold) {
+		unsigned char diff = abs(pix[i] - bpix[i]);
+		if(diff >= farThreshold && diff <= nearThreshold)
+			continue;
+		else
 			pix[i] = 0;
-		} 
 	}
 
 	kinectImg.flagImageChanged();
@@ -283,11 +291,11 @@ void ofApp::updateHands(){
 
 		if( !(newHands[i].centroid.x == 0 and newHands[i].centroid.y == 0) ) 
 		{
-			for (int i = 0; i < 5; ++i)
+			for (int j = 0; j < 5; ++j)
 			{
-				float smoothedX = ofLerp(keypoints[i]->x, oldKeypoints[i].x, smoothingRate);
-				float smoothedY = ofLerp(keypoints[i]->y, oldKeypoints[i].y, smoothingRate);
-				*keypoints[i] = ofPoint(smoothedX, smoothedY);
+				float smoothedX = ofLerp(keypoints[j]->x, oldKeypoints[j].x, smoothingRate);
+				float smoothedY = ofLerp(keypoints[j]->y, oldKeypoints[j].y, smoothingRate);
+				*keypoints[j] = ofPoint(smoothedX, smoothedY);
 			}
 			handCopy.velocity = ofVec2f((keypoints[0]->x - oldKeypoints[0].x)/2, (keypoints[0]->y - oldKeypoints[0].y)/2);
 		}
@@ -427,11 +435,17 @@ void ofApp::drawFeedback() {
 
 	ofPushStyle();
 	contourFinder.draw();
+	// kinectImg.draw(0,0);
 	ofSetColor(0,255,0);
 	for (int i = 0; i < contourFinder.size(); ++i)
 	{
-		unsigned int label = contourFinder.getLabel(i);
-		ofDrawBitmapString(ofToString(contourFinder.side[label]),100,100);
+		unsigned int l = contourFinder.getLabel(i);
+		ofDrawBitmapString(ofToString(contourFinder.side[l]),100,100);
+
+		ofPushStyle();
+			ofSetColor(255,255,0);
+			ofCircle(contourFinder.tips[l], 3);
+		ofPopStyle();
 		
 		ofPolyline rotatedRect = ofxCv::toOf(contourFinder.getMinAreaRect(i));
 		// ofCircle(contourFinder.ends[i], 3);
@@ -441,7 +455,7 @@ void ofApp::drawFeedback() {
 	ofSetColor(255,255,255);
 	for (int i = 0; i < hands.size(); ++i)
 	{
-		ofDrawBitmapString(ofToString(hands[i].velocity.length()),100,130);
+		// ofDrawBitmapString(ofToString(hands[i].velocity.length()),100,130);
 		ofCircle(hands[i].centroid, 3);
 		ofFill();
 		ofCircle(hands[i].end, 3);
@@ -480,15 +494,15 @@ void ofApp::drawFeedback() {
 	// << "r: " << r << endl
 	<< "nearThreshold: " << nearThreshold << endl
 	<< "farThreshold: " << farThreshold << endl
-	// << "MAX_HAND_SIZE: " << contourFinder.MAX_HAND_SIZE << endl
-	// << "MIN_HAND_SIZE: " << contourFinder.MIN_HAND_SIZE << endl
-	// << "MAX_WRIST_WIDTH: " << contourFinder.MAX_WRIST_WIDTH << endl
+	<< "MAX_HAND_SIZE: " << contourFinder.MAX_HAND_SIZE << endl
+	<< "MIN_HAND_SIZE: " << contourFinder.MIN_HAND_SIZE << endl
+	<< "MAX_WRIST_WIDTH: " << contourFinder.MAX_WRIST_WIDTH << endl
 	// << "hands found: " << hands.size() << endl
 	// << "contourFinder.size(): " << contourFinder.size() << endl
 	// << "noiseDist: " << noiseDist << endl
-	<< "MAX_CONTOUR_AREA: " << MAX_CONTOUR_AREA << endl
-	<< "MIN_CONTOUR_AREA: " << MIN_CONTOUR_AREA << endl
-	<< "CONTOUR_THRESHOLD: " << CONTOUR_THRESHOLD << endl
+	// << "MAX_CONTOUR_AREA: " << MAX_CONTOUR_AREA << endl
+	// << "MIN_CONTOUR_AREA: " << MIN_CONTOUR_AREA << endl
+	// << "CONTOUR_THRESHOLD: " << CONTOUR_THRESHOLD << endl
 	<< "frame: " << video.getCurrentFrame() << endl
 	<< ofToString(ofGetFrameRate()) << endl;
 
@@ -645,7 +659,13 @@ void ofApp::keyPressed(int key){
 			break;
 
 		
+		case 'B':
+			kinectBackground.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height);
+			break;
 
+		case 'b':
+			kinectBackground.set(0);
+			break;
 		
 
 		// case 'W': {

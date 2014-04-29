@@ -61,6 +61,7 @@ class ofApp : public ofBaseApp{
 		cv::Mat 			input;
 		cv::Mat 			croppedInput;
 		ofxCvGrayscaleImage	kinectImg;
+		ofxCvGrayscaleImage kinectBackground;
 		int 				nearThreshold;
 		int 				farThreshold;
 

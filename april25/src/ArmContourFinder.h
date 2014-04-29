@@ -25,8 +25,6 @@ public:
 
 	vector< int > bounds;
 
-	// Just so things remember their sides
-
 private:
 
 	bool findHand(int n);

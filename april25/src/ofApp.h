@@ -3,16 +3,16 @@
 // Calibration variables
 // -----------------------------------
 // Cropping out kinect data
-#define KINECT_CROP_LEFT 28
-#define KINECT_CROP_RIGHT 10
-#define KINECT_CROP_TOP 14
-#define KINECT_CROP_BOTTOM 27
+#define KINECT_CROP_LEFT 	28
+#define KINECT_CROP_RIGHT 	10
+#define KINECT_CROP_TOP 	14
+#define KINECT_CROP_BOTTOM 	27
 
 // Transforming kinect data to fit "real" world
 #define INPUT_DATA_ZOOM 2.57
-#define INPUT_DATA_DX 40
-#define	INPUT_DATA_DY -64
-#define INPUT_DATA_R 0
+#define INPUT_DATA_DX	40
+#define	INPUT_DATA_DY	-64
+#define INPUT_DATA_R 	0
 
 // Transforming video data to fit maquette
 #define VIDEO_X -69
@@ -20,6 +20,15 @@
 #define VIDEO_W 1866
 #define VIDEO_H 1046
 #define VIDEO_R 1.4
+
+// For the contour finder
+#define MIN_CONTOUR_AREA 1000
+
+// Video frame stuff
+#define ICE_START 		552
+#define ALL_BROKEN 		947
+#define ICE_STOP 		1103
+#define RIVERS_START 	1150
 // -----------------------------------
 
 #include "ofMain.h"
@@ -30,6 +39,7 @@
 #include "ofxRipples.h"
 #include "ofxBounce.h" 
 #include "ofxTrueTypeFontUC.h"
+#include "ofxGifDecoder.h"
 #include <cmath>
 
 class ofApp : public ofBaseApp{
@@ -44,6 +54,7 @@ class ofApp : public ofBaseApp{
 		void updateHands();
 
 		void draw();
+		void drawBeavers();
 		void drawHandOverlay();
 		void drawFeedback();
 
@@ -111,8 +122,11 @@ class ofApp : public ofBaseApp{
 		int noiseDist;
 		// Feedback
 		bool bFeedback;
-		// CV calibration
-		float MAX_CONTOUR_AREA, MIN_CONTOUR_AREA, CONTOUR_THRESHOLD;
+    
+		ofxGifDecoder 	gifDecoder;
+		ofxGifFile		tiger;
+
+		int PLAY_MODE;
 
 };
 

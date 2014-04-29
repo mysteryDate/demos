@@ -81,6 +81,15 @@ bool ArmContourFinder::findHand(int n) {
 
 	tips[l] = refitTip(n);
 
+	d1 = ofDistSquared(wrists[l][0].x, wrists[l][0].y, tips[l].x, tips[l].y);
+	d2 = ofDistSquared(wrists[l][1].x, wrists[l][1].y, tips[l].x, tips[l].y);
+	if(d1 <= MIN_HAND_SIZE * MIN_HAND_SIZE or d1 >= MAX_HAND_SIZE * MAX_HAND_SIZE 
+		or d2 <= MIN_HAND_SIZE * MIN_HAND_SIZE or d2 >= MAX_HAND_SIZE * MAX_HAND_SIZE) {
+		wrists[l] = findWrists(n);
+		if(wrists[l].size() != 2)
+			return false;
+	}
+
 	return true;
 
 }
@@ -198,12 +207,10 @@ ofPoint ArmContourFinder::findTip(int n) {
 	ofPoint newTip = polylines[n].getClosestPoint(mark);
 
 	//If our old tip is still good, keep it
-	if(tips.size() > n) {
-		ofPoint closestTip = polylines[n].getClosestPoint(tips[getLabel(n)]);
-		float dist = ofDistSquared(closestTip.x, closestTip.y, newTip.x, newTip.y);
-		if(dist < 100) { //TODO change magic number
-			return closestTip;
-		}
+	ofPoint closestTip = polylines[n].getClosestPoint(tips[getLabel(n)]);
+	float dist = ofDistSquared(closestTip.x, closestTip.y, newTip.x, newTip.y);
+	if(dist < 100) { //TODO change magic number
+		return closestTip;
 	}
 
 	return newTip;
@@ -308,6 +315,12 @@ ofPoint ArmContourFinder::refitTip(int n)
 		i++;
 		if( i == polylines[n].size() )
 			i = 0;
+	}
+
+	ofPoint closestTip = polylines[n].getClosestPoint(tips[getLabel(n)]);
+	float dist = ofDistSquared(closestTip.x, closestTip.y, newTip.x, newTip.y);
+	if(dist < 100) { //TODO change magic number
+		return closestTip;
 	}
 	
 	return newTip;

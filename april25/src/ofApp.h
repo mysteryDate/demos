@@ -64,6 +64,7 @@ class ofApp : public ofBaseApp{
 		ofxCvGrayscaleImage kinectBackground;
 		int 				nearThreshold;
 		int 				farThreshold;
+		int 				threshold;
 
 		// Cv
         ArmContourFinder	contourFinder;

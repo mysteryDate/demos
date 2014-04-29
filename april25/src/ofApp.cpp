@@ -16,7 +16,6 @@ void ofApp::setup(){
 	kinectBackground.set(0);
 
 	nearThreshold = 192;
-	farThreshold = 165;
 	farThreshold = 2;
 
 	//video instructions
@@ -41,8 +40,6 @@ void ofApp::setup(){
 	MAX_CONTOUR_AREA = 16000;
 	CONTOUR_THRESHOLD = 1;
 	contourFinder.setMinArea(MIN_CONTOUR_AREA);
-	contourFinder.setMaxArea(MAX_CONTOUR_AREA);
-	// contourFinder.setThreshold(CONTOUR_THRESHOLD);
 	// contourFinder.setMaxArea(MAX_CONTOUR_AREA);
 
 	contourFinder.bounds[0] = 1;
@@ -61,6 +58,7 @@ void ofApp::setup(){
 
 	video.setFrame(1300);
 	video.setPaused(true);
+
 
 }
 
@@ -285,6 +283,9 @@ void ofApp::updateHands(){
 	for (int i = 0; i < hands.size(); ++i)
 	{
 		Hand handCopy = newHands[i];
+		// Doesn't copy vectors, do it by 'hand' for now
+		handCopy.wrists = newHands[i].wrists;
+		handCopy.velocity = newHands[i].velocity;
 
 		ofPoint oldKeypoints[] = {hands[i].centroid, hands[i].end, hands[i].tip, hands[i].wrists[0], hands[i].wrists[1]};
 		ofPoint * keypoints[] = {&handCopy.centroid, &handCopy.end, &handCopy.tip, &handCopy.wrists[0], &handCopy.wrists[1]};
@@ -450,6 +451,7 @@ void ofApp::drawFeedback() {
 		ofPolyline rotatedRect = ofxCv::toOf(contourFinder.getMinAreaRect(i));
 		// ofCircle(contourFinder.ends[i], 3);
 		rotatedRect.draw();
+
 	}
 
 	ofSetColor(255,255,255);
@@ -468,6 +470,9 @@ void ofApp::drawFeedback() {
 		ofFill();
 		ofCircle(hands[i].wrists[0], 3);
 		ofCircle(hands[i].wrists[1], 3);
+
+		int d1 = ofDistSquared(hands[i].wrists[0].x, hands[i].wrists[0].y, hands[i].tip.x, hands[i].tip.y);
+		ofDrawBitmapString(ofToString(d1),100,130);
 	}
 
 	ofSetColor(0,255,0);

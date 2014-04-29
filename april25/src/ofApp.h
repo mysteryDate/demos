@@ -61,11 +61,7 @@ class ofApp : public ofBaseApp{
 		void exit();
 
 		void keyPressed(int key);
-		void mousePressed(int x, int y, int button);
-
-		// Test input
-
-
+		
 		// Input Processing
 		ofxKinect 			kinect;
 		ofVideoPlayer 		video;		

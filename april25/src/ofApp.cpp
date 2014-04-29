@@ -49,7 +49,6 @@ void ofApp::setup(){
 
 	gifDecoder.decode("tiger.gif");
 	tiger = gifDecoder.getFile();
-	tiger.setBackgroundColor(ofColor(255,0,0,0));
 
 }
 

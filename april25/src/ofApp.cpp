@@ -42,14 +42,15 @@ void ofApp::setup(){
 
 	smoothingRate = 0.5;
 
-	video.setFrame(2000);
-	video.setPaused(true);
+//	video.setFrame(2000);
+//	video.setPaused(true);
 
-	bFeedback = true;
+//	bFeedback = true;
 
 	gifDecoder.decode("tiger.gif");
 	tiger = gifDecoder.getFile();
-
+    
+    
 }
 
 // Read in the proper regions for river display
@@ -102,19 +103,20 @@ void ofApp::update(){
 	video.update();
 
 	int frame = video.getCurrentFrame();
-	if(frame < RIVERS_START)
-		PLAY_MODE = 1;
-	else if (frame > RIVERS_START and frame < video.getTotalNumFrames())
-		PLAY_MODE = 2;
-	else {
-		video.stop();
-		PLAY_MODE = 3;
-		nearThreshold = 10;
-	}
+//	if(frame < RIVERS_START)
+//		PLAY_MODE = 1;
+//	else if (frame > RIVERS_START and frame < video.getTotalNumFrames())
+//		PLAY_MODE = 2;
+//	else {
+//		video.stop();
+//		PLAY_MODE = 3;
+//		nearThreshold = 10;
+//	}
 
 	bounce.setTexture(video.getTextureReference(), 1);
 
 	if(kinect.isFrameNew()) {
+        
 
 		kinectImg.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height);
 		transformInput();
@@ -307,12 +309,12 @@ void ofApp::draw(){
 		bounce.draw(VIDEO_X, VIDEO_Y, VIDEO_W, VIDEO_H);
 	ofRotateZ(-VIDEO_R);
 
-	tiger.drawFrame(0,0,0);
+//	tiger.drawFrame(0,0,0);
 
-	if(PLAY_MODE == 1 or PLAY_MODE == 2) 
+//	if(PLAY_MODE == 1 or PLAY_MODE == 2) 
 		drawHandOverlay();
-	if(PLAY_MODE == 3)
-		drawBeavers();
+//	if(PLAY_MODE == 3)
+//		drawBeavers();
 
 	if(bFeedback)
 		drawFeedback();

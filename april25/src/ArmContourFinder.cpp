@@ -32,9 +32,10 @@ void ArmContourFinder::update() {
 
 ofPolyline ArmContourFinder::getHand(int n) {
 
-	if(!handFound[n]) return;
 
-	ofPolyline hand;
+    ofPolyline hand;
+
+	if(!handFound[n]) return hand;
 
 	unsigned int start, end;
 	polylines[n].getClosestPoint(wrists[getLabel(n)][1], &start);
@@ -49,7 +50,7 @@ ofPolyline ArmContourFinder::getHand(int n) {
 			i = 0;
 	}
 	hand.addVertex( polylines[n][end] );
-	
+
 	// So that it closes up;
 	hand.setClosed(true);
 
@@ -140,7 +141,7 @@ ofPoint ArmContourFinder::findEnd(int n) {
 	// Remove two farthest from endpoint
 	for (int i = 0; i < 2; ++i)
 	{
-		float maxDist = 0;			
+		float maxDist = 0;
 		int indexToRemove;
 		for (int i = 0; i < verts.size(); ++i)
 		{
@@ -192,7 +193,7 @@ ofPoint ArmContourFinder::findTip(int n) {
 
 	float xn = 3*boxCenter.x - 2*ends[l].x;
 	float yn = 3*boxCenter.y - 2*ends[l].y;
-	
+
 	ofPoint mark = ofPoint(xn, yn);
 
 	ofPoint newTip = polylines[n].getClosestPoint(mark);
@@ -288,7 +289,7 @@ vector < ofPoint > ArmContourFinder::findWrists(int n) {
 }
 
 ofPoint ArmContourFinder::refitTip(int n)
-{	
+{
 	unsigned int l = getLabel(n);
 	ofPoint midWrist = ofPoint( (wrists[l][0].x + wrists[l][1].x)/2, (wrists[l][0].y + wrists[l][1].y)/2 );
 
@@ -309,7 +310,7 @@ ofPoint ArmContourFinder::refitTip(int n)
 		if( i == polylines[n].size() )
 			i = 0;
 	}
-	
+
 	return newTip;
 }
 

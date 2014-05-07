@@ -12,9 +12,11 @@ void ofApp::setup(){
 	kinect.init();
 	kinect.open();
 	kinectImg.allocate(kinect.width, kinect.height);
+	kinectBackground.allocate(kinect.width, kinect.height);
+	kinectBackground.set(0);
 
-	nearThreshold = 192;
-	farThreshold = 165;
+	nearThreshold = 40;
+	farThreshold = 2;
 
 	//video instructions
 	video.loadMovie("Map_Argenteuil_v5.mov");
@@ -23,7 +25,6 @@ void ofApp::setup(){
 	// For hand display
 	fillInRiverRegions();
 	lineSmoothing = 4;
-	armScaleUp = 1.1;
 	myfont.loadFont("AltoPro-Normal.ttf", 12);
 
 	//for water ripples
@@ -31,32 +32,25 @@ void ofApp::setup(){
 	ripples.allocate(1920, 1080);
 	bounce.allocate(1920, 1080);
 	riverMask.loadImage("river_mask_processed.png");
-
-	bFeedback = true;
-
-	MIN_CONTOUR_AREA = 1000;
-	MAX_CONTOUR_AREA = 16000;
-	CONTOUR_THRESHOLD = 1;
+	
 	contourFinder.setMinArea(MIN_CONTOUR_AREA);
-	contourFinder.setMaxArea(MAX_CONTOUR_AREA);
-	// contourFinder.setThreshold(CONTOUR_THRESHOLD);
+
 	contourFinder.bounds[0] = 1;
 	contourFinder.bounds[1] = 1;
 	contourFinder.bounds[2] = kinect.width - KINECT_CROP_LEFT - KINECT_CROP_RIGHT - 1;
 	contourFinder.bounds[3] = kinect.height - KINECT_CROP_TOP - KINECT_CROP_BOTTOM - 1;
 
-	noiseDist = 0;
 	smoothingRate = 0.5;
 
-	x = VIDEO_X;
-	y = VIDEO_Y;
-	w = VIDEO_W;
-	h = VIDEO_H;
-	r = VIDEO_R;
+//	video.setFrame(2000);
+//	video.setPaused(true);
 
-	video.setFrame(1300);
-	video.setPaused(true);
+//	bFeedback = true;
 
+	gifDecoder.decode("tiger.gif");
+	tiger = gifDecoder.getFile();
+    
+    
 }
 
 // Read in the proper regions for river display
@@ -108,9 +102,21 @@ void ofApp::update(){
 	kinect.update();
 	video.update();
 
+	int frame = video.getCurrentFrame();
+//	if(frame < RIVERS_START)
+//		PLAY_MODE = 1;
+//	else if (frame > RIVERS_START and frame < video.getTotalNumFrames())
+//		PLAY_MODE = 2;
+//	else {
+//		video.stop();
+//		PLAY_MODE = 3;
+//		nearThreshold = 10;
+//	}
+
 	bounce.setTexture(video.getTextureReference(), 1);
 
 	if(kinect.isFrameNew()) {
+        
 
 		kinectImg.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height);
 		transformInput();
@@ -125,25 +131,25 @@ void ofApp::update(){
 		contourFinder.update();
 
 		updateHands();
-
 	}
-
 	updateRipples();
-
 }
 
 // Crop the image and threshold
 void ofApp::transformInput()
 {
 	unsigned char *pix = kinectImg.getPixels();
+	unsigned char *bpix = kinectBackground.getPixels();
 
 	int numPix = kinectImg.getWidth() * kinectImg.getHeight();
 
 	for (int i = 0; i < numPix; ++i)
 	{
-		if(pix[i] > nearThreshold or pix[i] < farThreshold) {
+		unsigned char diff = abs(pix[i] - bpix[i]);
+		if(diff >= farThreshold && diff <= nearThreshold)
+			continue;
+		else
 			pix[i] = 0;
-		} 
 	}
 
 	kinectImg.flagImageChanged();
@@ -158,10 +164,6 @@ void ofApp::updateRipples(){
 	// Ice is gone at 1103
 	// Rivers exist at 1190 
 	int frame = video.getCurrentFrame();
-	int ICE_START 		= 552;
-	int ALL_BROKEN 		= 947;
-	int ICE_STOP 		= 1103;
-	int RIVERS_START 	= 1150;
 
 	// Water ripples
 	ripples.begin();
@@ -217,14 +219,15 @@ void ofApp::updateHands(){
 
 	for (int i = 0; i < contourFinder.size(); ++i)
 	{
-		if(contourFinder.handFound[i]) {
+		unsigned int l = contourFinder.getLabel(i);
+		if(contourFinder.handFound[l]) {
 			Hand blob;
-			blob.label = contourFinder.getLabel(i);
+			blob.label = l;
 			blob.line = contourFinder.getHand(i);
 			blob.centroid = blob.line.getCentroid2D();
-			blob.tip = contourFinder.tips[blob.label];
-			blob.wrists = contourFinder.wrists[blob.label];
-			blob.end = contourFinder.ends[blob.label];
+			blob.tip = contourFinder.tips[l];
+			blob.wrists = contourFinder.wrists[l];
+			blob.end = contourFinder.ends[l];
 			blob.boxCenter = ofxCv::toOf(contourFinder.getCenter(i));
 			blob.index = i;
 			newHands.push_back(blob);
@@ -273,39 +276,28 @@ void ofApp::updateHands(){
 	sort(hands.begin(), hands.end());
 
 	//Finally, the magic
-	int ignoreDist = noiseDist * noiseDist;
 	for (int i = 0; i < hands.size(); ++i)
 	{
 		Hand handCopy = newHands[i];
+		// Doesn't copy vectors, do it by 'hand' for now
+		handCopy.wrists = newHands[i].wrists;
+		handCopy.velocity = newHands[i].velocity;
 
 		ofPoint oldKeypoints[] = {hands[i].centroid, hands[i].end, hands[i].tip, hands[i].wrists[0], hands[i].wrists[1]};
 		ofPoint * keypoints[] = {&handCopy.centroid, &handCopy.end, &handCopy.tip, &handCopy.wrists[0], &handCopy.wrists[1]};
 
 		if( !(newHands[i].centroid.x == 0 and newHands[i].centroid.y == 0) ) 
 		{
-			for (int i = 0; i < 5; ++i)
+			for (int j = 0; j < 5; ++j)
 			{
-				float smoothedX = ofLerp(keypoints[i]->x, oldKeypoints[i].x, smoothingRate);
-				float smoothedY = ofLerp(keypoints[i]->y, oldKeypoints[i].y, smoothingRate);
-				*keypoints[i] = ofPoint(smoothedX, smoothedY);
+				float smoothedX = ofLerp(keypoints[j]->x, oldKeypoints[j].x, smoothingRate);
+				float smoothedY = ofLerp(keypoints[j]->y, oldKeypoints[j].y, smoothingRate);
+				*keypoints[j] = ofPoint(smoothedX, smoothedY);
 			}
-			handCopy.velocity = ofVec2f((keypoints[0]->x - oldKeypoints[0].x)/2, (keypoints[0]->y - oldKeypoints[0].y)/2);
+			handCopy.velocity = ofVec2f((keypoints[0]->x - oldKeypoints[0].x)/2, (keypoints[0]->y - oldKeypoints[0].y)/2);	
 		}
 
-		ofPoint oldCentroid = hands[i].centroid;
-		ofPoint newCentroid = handCopy.centroid;
-		ofPoint oldTip 		= hands[i].tip;
-		ofPoint newTip 		= handCopy.tip;
-
 		hands[i] = handCopy;
-
-		int centDist = ofDistSquared(oldCentroid.x, oldCentroid.y, newCentroid.x, newCentroid.y);
-		int tipDist = ofDistSquared(oldTip.x, oldTip.y, newTip.x, newTip.y);
-
-		if(centDist < ignoreDist) 
-			hands[i].centroid 	= oldCentroid;
-		if(tipDist < ignoreDist)
-			hands[i].tip 		= oldTip;
 
 	}
 }
@@ -317,10 +309,19 @@ void ofApp::draw(){
 		bounce.draw(VIDEO_X, VIDEO_Y, VIDEO_W, VIDEO_H);
 	ofRotateZ(-VIDEO_R);
 
-	drawHandOverlay();
+//	tiger.drawFrame(0,0,0);
+
+//	if(PLAY_MODE == 1 or PLAY_MODE == 2) 
+		drawHandOverlay();
+//	if(PLAY_MODE == 3)
+//		drawBeavers();
 
 	if(bFeedback)
 		drawFeedback();
+
+}
+
+void ofApp::drawBeavers() {
 
 }
 
@@ -427,21 +428,28 @@ void ofApp::drawFeedback() {
 
 	ofPushStyle();
 	contourFinder.draw();
+	// kinectImg.draw(0,0);
 	ofSetColor(0,255,0);
 	for (int i = 0; i < contourFinder.size(); ++i)
 	{
-		unsigned int label = contourFinder.getLabel(i);
-		ofDrawBitmapString(ofToString(contourFinder.side[label]),100,100);
+		unsigned int l = contourFinder.getLabel(i);
+		ofDrawBitmapString(ofToString(contourFinder.side[l]),100,100);
+
+		ofPushStyle();
+			ofSetColor(255,255,0);
+			ofCircle(contourFinder.tips[l], 3);
+		ofPopStyle();
 		
 		ofPolyline rotatedRect = ofxCv::toOf(contourFinder.getMinAreaRect(i));
 		// ofCircle(contourFinder.ends[i], 3);
 		rotatedRect.draw();
+
 	}
 
 	ofSetColor(255,255,255);
 	for (int i = 0; i < hands.size(); ++i)
 	{
-		ofDrawBitmapString(ofToString(hands[i].velocity.length()),100,130);
+		// ofDrawBitmapString(ofToString(hands[i].velocity.length()),100,130);
 		ofCircle(hands[i].centroid, 3);
 		ofFill();
 		ofCircle(hands[i].end, 3);
@@ -454,6 +462,9 @@ void ofApp::drawFeedback() {
 		ofFill();
 		ofCircle(hands[i].wrists[0], 3);
 		ofCircle(hands[i].wrists[1], 3);
+
+		int d1 = ofDistSquared(hands[i].wrists[0].x, hands[i].wrists[0].y, hands[i].tip.x, hands[i].tip.y);
+		ofDrawBitmapString(ofToString(d1),100,130);
 	}
 
 	ofSetColor(0,255,0);
@@ -480,15 +491,14 @@ void ofApp::drawFeedback() {
 	// << "r: " << r << endl
 	<< "nearThreshold: " << nearThreshold << endl
 	<< "farThreshold: " << farThreshold << endl
-	// << "MAX_HAND_SIZE: " << contourFinder.MAX_HAND_SIZE << endl
-	// << "MIN_HAND_SIZE: " << contourFinder.MIN_HAND_SIZE << endl
-	// << "MAX_WRIST_WIDTH: " << contourFinder.MAX_WRIST_WIDTH << endl
+	<< "MAX_HAND_SIZE: " << contourFinder.MAX_HAND_SIZE << endl
+	<< "MIN_HAND_SIZE: " << contourFinder.MIN_HAND_SIZE << endl
+	<< "MAX_WRIST_WIDTH: " << contourFinder.MAX_WRIST_WIDTH << endl
 	// << "hands found: " << hands.size() << endl
 	// << "contourFinder.size(): " << contourFinder.size() << endl
-	// << "noiseDist: " << noiseDist << endl
-	<< "MAX_CONTOUR_AREA: " << MAX_CONTOUR_AREA << endl
-	<< "MIN_CONTOUR_AREA: " << MIN_CONTOUR_AREA << endl
-	<< "CONTOUR_THRESHOLD: " << CONTOUR_THRESHOLD << endl
+	// << "MAX_CONTOUR_AREA: " << MAX_CONTOUR_AREA << endl
+	// << "MIN_CONTOUR_AREA: " << MIN_CONTOUR_AREA << endl
+	// << "CONTOUR_THRESHOLD: " << CONTOUR_THRESHOLD << endl
 	<< "frame: " << video.getCurrentFrame() << endl
 	<< ofToString(ofGetFrameRate()) << endl;
 
@@ -531,30 +541,6 @@ void ofApp::keyPressed(int key){
 			if (nearThreshold < 0) nearThreshold = 0;
 			break;
 
-		// case 'H':
-		// 	contourFinder.MAX_HAND_SIZE++;
-		// 	break;
-
-		// case 'h':
-		// 	contourFinder.MAX_HAND_SIZE--;
-		// 	break;
-
-		// case 'G':
-		// 	contourFinder.MIN_HAND_SIZE++;
-		// 	break;
-
-		// case 'g':
-		// 	contourFinder.MIN_HAND_SIZE--;
-		// 	break;
-
-		// case 'S':
-		// 	contourFinder.MAX_WRIST_WIDTH++;
-		// 	break;
-
-		// case 's':
-		// 	contourFinder.MAX_WRIST_WIDTH--;
-			// break;
-
 		case 'f':
 			bFeedback = !bFeedback;
 			break;
@@ -565,112 +551,10 @@ void ofApp::keyPressed(int key){
 			else
 				video.setPaused(true);
 			break;
-
-		// case 'D':
-		// 	noiseDist++;
-		// 	break;
-
-		// case 'd':
-		// 	noiseDist--;
-		// 	break;
-
-		// case OF_KEY_LEFT:
-		// 	x--;
-		// 	break;
-
-		// case OF_KEY_RIGHT:
-		// 	x++;
-		// 	break;
-
-		// case OF_KEY_UP:
-		// 	y--;
-		// 	break;
-
-		// case OF_KEY_DOWN:
-		// 	y++;
-		// 	break;
-
-		// case 'w':
-		// 	w--;
-		// 	break;
-
-		// case 'W':
-		// 	w++;
-		// 	break;
-
-		// case 'h':
-		// 	h--;
-		// 	break;
-
-		// case 'H':
-		// 	h++;
-		// 	break;
-
-		// case 'r':
-		// 	r-=0.1;
-		// 	break;
-
-		// case 'R':
-		// 	r+=0.1;
-		// 	break;
-
-		case 'A':
-			MAX_CONTOUR_AREA *= 1.1;
-			contourFinder.setMaxArea(MAX_CONTOUR_AREA);
-			break;
-
-		case 'a':
-			MAX_CONTOUR_AREA *= 0.9;
-			contourFinder.setMaxArea(MAX_CONTOUR_AREA);
-			break;
-
-		case 'Q':
-			MIN_CONTOUR_AREA *= 1.1;
-			contourFinder.setMinArea(MIN_CONTOUR_AREA);
-			break;
-
-		case 'q':
-			MIN_CONTOUR_AREA *= 0.9;
-			contourFinder.setMinArea(MIN_CONTOUR_AREA);
-			break;
-
-		case 'T':
-			CONTOUR_THRESHOLD *= 1.1;
-			contourFinder.setThreshold(CONTOUR_THRESHOLD);
-			break;
-
-		case 't':
-			CONTOUR_THRESHOLD *= 0.9;
-			contourFinder.setThreshold(CONTOUR_THRESHOLD);
-			break;
-
 		
-
-		
-
-		// case 'W': {
-		// 	string riverVerteces;
-		// 	for (int i = 0; i < riverRegions[RIVER_NUMBER].size(); ++i)
-		// 	{
-		// 		riverVerteces.append(ofToString(riverRegions[RIVER_NUMBER][i].x));
-		// 		riverVerteces.append("\n");
-		// 		riverVerteces.append(ofToString(riverRegions[RIVER_NUMBER][i].y));
-		// 		riverVerteces.append("\n");
-		// 	}
-		// 	ofBuffer buff;
-		// 	buff.set(riverVerteces.c_str(), riverVerteces.size());
-		// 	ofBufferToFile(FILE_NAME, buff);
-		// 	break;
-		// }
+		case 'B':
+			kinectBackground.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height);
+			break;
 	}
 
 }
-
-//--------------------------------------------------------------
-void ofApp::mousePressed(int x, int y, int button){
-
-	// riverRegions[RIVER_NUMBER].addVertex(x, y);
-	return;
-
-}
-

@@ -8,10 +8,11 @@ public:
 	ArmContourFinder();
 
 	// The keys are the labels
-	map< int, ofPoint > ends;
-	map< int, ofPoint > tips;
-	map< int, vector< ofPoint > > wrists;
-	vector< bool > handFound;
+	map< unsigned int, ofPoint > ends;
+	map< unsigned int, ofPoint > tips;
+	map< unsigned int, vector< ofPoint > > wrists;
+	map< unsigned int, bool > handFound;
+	map< unsigned int, int > side;
 
 	void update();
 	ofPolyline getHand(int n);
@@ -23,9 +24,6 @@ public:
 	int MAX_MOVEMENT_DISTANCE;
 
 	vector< int > bounds;
-
-	// Just so things remember their sides
-	map< unsigned int, int > side;
 
 private:
 
